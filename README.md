@@ -16,6 +16,7 @@ from utils import rows_to_dataset, validate_dataset
 import os
 
 rows = [
+    # audio file name has to be unique!
     "audio": ["/path/to/audio1.wav", "/path/to/audio2.wav", "/path/to/audio3.wav", ],
     "instruction": ["inst1", "inst2", "inst3"],
     "label": ["l1", "l2", "l3"],
