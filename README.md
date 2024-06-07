@@ -21,5 +21,5 @@ rows = [
 ]
 ds = rows_to_dataset(rows)
 validate_dataset(ds)
-push_dataset("your/repo", rows)
+ds.push_to_hub(repo_id="your/repo_id", split="test", token=os.environ["HF_TOKEN"])
 ```
