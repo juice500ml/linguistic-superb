@@ -12,7 +12,8 @@ HF_TOKEN=YOUR_HF_TOKEN python3 TASK_NAME.py
 
 ## How to use utils
 ```python
-from utils import rows_to_dataset, validate_dataset, push_dataset
+from utils import rows_to_dataset, validate_dataset
+import os
 
 rows = [
     "audio": ["/path/to/audio1.wav", "/path/to/audio2.wav", "/path/to/audio3.wav", ],
