@@ -22,8 +22,7 @@ instructions = [
 
 
 if __name__ == "__main__":
-    ds = load_dataset("juice500/spoken_sts", cache_dir="datasets_cache", revision="refs/convert/parquet",
-)
+    ds = load_dataset("juice500/spoken_sts", cache_dir="datasets_cache")
 
     # Filter 500 samples
     indices = np.arange(len(ds["test"]["similarity"]))
@@ -45,8 +44,6 @@ if __name__ == "__main__":
     new_ds = new_ds.cast_column("audio1", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio2", Audio(sampling_rate=16_000))
 
-    print(new_ds[0])
-
     # Validate & Push
-    # validate_dataset(new_ds)
-    # new_ds.push_to_hub(repo_id="DynamicSuperb/SemanticTextualSimilarity_SpokenSTS", split="test", token=os.environ["HF_TOKEN"])
+    validate_dataset(new_ds)
+    new_ds.push_to_hub(repo_id="DynamicSuperb/SemanticTextualSimilarity_SpokenSTS", split="test", token=os.environ["HF_TOKEN"])
