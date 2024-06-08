@@ -24,7 +24,7 @@ def validate_dataset(ds: Dataset) -> None:
     print("Validating dataset...")
 
     # column name check
-    assert len(set(ds.features.keys()) - {"audio", "instruction", "label", "audio1", "audio2", "audio3", "file1", "file2", "file3"}) == 0
+    assert len(set(ds.features.keys()) - {"instruction", "label", "audio", "audio1", "audio2", "audio3", "file", "file1", "file2", "file3"}) == 0
 
     # label check
     sample_size = len(ds["label"])
