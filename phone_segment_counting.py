@@ -41,18 +41,13 @@ if __name__ == "__main__":
         sample["label"] = len(sample["phn"].split())
         return sample
 
-    def calculate_audio_length(sample):
-        sample["duration"] = len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"]
-        return sample
-    
     new_ds = new_ds.map(calculate_length, num_proc=32)
-    new_ds = new_ds.map(calculate_audio_length, num_proc=32)
 
     # Filter out samples with length
     new_ds = new_ds.filter(lambda sample: 1 < sample["label"] <= 10)
 
     # Filter out samples longer than 2 seconds
-    new_ds = new_ds.filter(lambda sample: sample["duration"] <= 2)
+    new_ds = new_ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
 
     # Categorize the samples by their lengths
     length_categories = defaultdict(list)
@@ -79,7 +74,6 @@ if __name__ == "__main__":
         }
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds["test"].column_names, num_proc=32)
     new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
-    new_ds = new_ds.remove_columns("duration")
 
     # Validate & Push
     validate_dataset(new_ds)
