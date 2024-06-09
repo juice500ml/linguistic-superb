@@ -25,3 +25,5 @@ ds = rows_to_dataset(rows)
 validate_dataset(ds)
 ds.push_to_hub(repo_id="your/repo_id", split="test", token=os.environ["HF_TOKEN"])
 ```
+## References
+Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020. Stanza: A Python Natural Language Processing Toolkit for Many Human Languages. *In Association for Computational Linguistics (ACL) System Demonstrations*. 2020.
