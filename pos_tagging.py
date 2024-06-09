@@ -81,14 +81,11 @@ if __name__ == "__main__":
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=new_ds.column_names, num_proc=32)
     new_ds = new_ds.filter(lambda x: "label" in x and x["label"] != "")
     new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
-    
-    print(len(new_ds))
-    
+        
     # Convert to pandas DataFrame and save as CSV
     df = new_ds.to_pandas()
     df.to_csv("pos_tagging.csv", index=False)
     
-    print(new_ds[0])
     # Validate & Push
     validate_dataset(new_ds)
-    new_ds.push_to_hub(repo_id="speech31/Part-of-Speech_Estimation", split="test", token=os.environ["HF_TOKEN"])
+    new_ds.push_to_hub(repo_id="DynamicSuperb/PoS_Estimation_LibriTTS", split="test", token=os.environ["HF_TOKEN"])
