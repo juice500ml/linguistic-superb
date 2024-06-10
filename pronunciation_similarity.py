@@ -63,6 +63,7 @@ if __name__ == "__main__":
         cache_dir="datasets_cache",
         revision="refs/convert/parquet",
     )
+    new_ds = ds["test"]
 
     # multilingual pronunciation similarity
         # A,B,X from the same language
@@ -71,35 +72,35 @@ if __name__ == "__main__":
     random.seed(15213)
 
     # Filter out samples longer than 2 seconds
-    ds = ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
+    new_ds = new_ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
 
     # ensure no transcriptions are nan
-    ds = ds.filter(lambda sample: sample["word"] is not None)
+    new_ds = new_ds.filter(lambda sample: sample["word"] is not None)
 
     # get indices
     file_to_index = defaultdict(str)
-    for i, ex in enumerate(ds['test']):
+    for i, ex in enumerate(new_ds):
         file_to_index[ex["file"]] = i
 
     # columns: file1, audio1; file2, audio2; file3, audio3
     rows = defaultdict(list)
-    for (file1, file2, file3) in tqdm(generate_triplets(ds["test"]["file"])):
+    for (file1, file2, file3) in tqdm(generate_triplets(new_ds["file"])):
         rows["file1"].append(file1)
-        file1_ex = ds["test"][file_to_index[file1]]
+        file1_ex = new_ds[file_to_index[file1]]
         rows["audio1"].append(file1_ex["audio"])
         # the phones for the word, e.g. "kaʊ"
         rows["word1"].append(file1_ex["word"])
 
         rows["file2"].append(file2)
-        file2_ex = ds["test"][file_to_index[file2]]
+        file2_ex = new_ds[file_to_index[file2]]
         rows["audio2"].append(file2_ex["audio"])
         rows["word2"].append(file2_ex["word"])
 
         rows["file3"].append(file3)
-        file3_ex = ds["test"][file_to_index[file3]]
+        file3_ex = new_ds[file_to_index[file3]]
         rows["audio3"].append(file3_ex["audio"])
         rows["word3"].append(file3_ex["word"])
-    ds = Dataset.from_dict(rows)
+    new_ds = Dataset.from_dict(rows)
 
     dist = Distance()
     def generate_label(sample):
@@ -112,7 +113,33 @@ if __name__ == "__main__":
             else "B"
         return sample
 
-    ds = ds.map(generate_label, num_proc=32)
+    new_ds = new_ds.map(generate_label, num_proc=32)
 
     # only keep examples where the pronunciation similarity is unambiguous
-    ds = ds.filter(lambda sample: abs(sample["dist_A_X"] - sample["dist_B_X"]) > SIM_THRESH)
+    new_ds = new_ds.filter(lambda sample: abs(sample["dist_A_X"] - sample["dist_B_X"]) > SIM_THRESH)
+
+    # Randomly select 90% of the samples for each length so that the duration is less than 1 hour
+    # Create a new dataset with the selected indices
+    selected_indices = random.sample(range(len(new_ds)), int(0.9 * len(new_ds)))
+    new_ds = new_ds.select(selected_indices)
+
+    # Reformatting
+    def _map(sample, index):
+        return {
+            "audio1": sample["audio1"],
+            "file1": sample["file1"],
+            "audio2": sample["audio2"],
+            "file2": sample["file2"],
+            "audio3": sample["audio3"],
+            "file3": sample["file3"],
+            "instruction": instructions[index % len(instructions)],
+            "label": sample["label"],
+        }
+    new_ds = new_ds.map(_map, with_indices=True, remove_columns=new_ds.column_names, num_proc=32)
+    new_ds = new_ds.cast_column("audio1", Audio(sampling_rate=16_000))
+    new_ds = new_ds.cast_column("audio2", Audio(sampling_rate=16_000))
+    new_ds = new_ds.cast_column("audio3", Audio(sampling_rate=16_000))
+
+    # Validate & Push
+    validate_dataset(new_ds)
+    new_ds.push_to_hub(repo_id="kalbin/MultilingualPronunciationSimilarity_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
