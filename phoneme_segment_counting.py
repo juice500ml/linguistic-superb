@@ -7,26 +7,26 @@ from utils import validate_dataset
 
 
 instructions = [
-    "Based on this audio, count the number of phones in the corresponding utterance. Please write in Arabic numerals.",
-    "Please count the number of phones in this audio. Use Arabic numbers for your answer.",
-    "Determine the number of phones in the given utterance. Write your answer in numbers.",
-    "Identify the number of phones in this audio file. Use Arabic digits.",
-    "Listen to the audio and count the number of phones present. Write in digits.",
-    "Calculate the total number of phones in this audio clip. Please use Arabic numerals.",
-    "From the audio, ascertain the number of phones in the utterance. Write in Arabic numbers.",
-    "Count how many phones you hear in this audio. Use numbers for your response.",
-    "Please determine the number of phones in the audio provided. Write in Arabic digits.",
-    "Identify and count the phones in this audio sample. Use digits.",
-    "Based on this audio, identify the number of phones. Write in Arabic numerals.",
-    "Calculate the number of phones in the provided audio. Use Arabic numbers.",
-    "Listen and count the phones in this audio recording. Write your answer in numbers.",
-    "Count the phones present in this given audio file. Use Arabic digits.",
-    "Identify the total phones in this audio clip. Write in digits.",
-    "Determine and count the number of phones in the provided audio. Use Arabic numerals.",
-    "Based on the audio clip, calculate the number of phones. Write in numbers.",
-    "Count the total number of phones in the given audio sample. Use Arabic numbers.",
-    "Listen to the audio and determine the number of phones. Write in Arabic digits.",
-    "Identify the number of phones in the provided audio recording. Use digits."
+    "Based on this audio, count the number of phonemes in the corresponding utterance. Please write in Arabic numerals.",
+    "Please count the number of phonemes in this audio. Use Arabic numbers for your answer.",
+    "Determine the number of phonemes in the given utterance. Write your answer in numbers.",
+    "Identify the number of phonemes in this audio file. Use Arabic digits.",
+    "Listen to the audio and count the number of phonemes present. Write in digits.",
+    "Calculate the total number of phonemes in this audio clip. Please use Arabic numerals.",
+    "From the audio, ascertain the number of phonemes in the utterance. Write in Arabic numbers.",
+    "Count how many phonemes you hear in this audio. Use numbers for your response.",
+    "Please determine the number of phonemes in the audio provided. Write in Arabic digits.",
+    "Identify and count the phonemes in this audio sample. Use digits.",
+    "Based on this audio, identify the number of phonemes. Write in Arabic numerals.",
+    "Calculate the number of phonemes in the provided audio. Use Arabic numbers.",
+    "Listen and count the phonemes in this audio recording. Write your answer in numbers.",
+    "Count the phonemes present in this given audio file. Use Arabic digits.",
+    "Identify the total phonemes in this audio clip. Write in digits.",
+    "Determine and count the number of phonemes in the provided audio. Use Arabic numerals.",
+    "Based on the audio clip, calculate the number of phonemes. Write in numbers.",
+    "Count the total number of phonemes in the given audio sample. Use Arabic numbers.",
+    "Listen to the audio and determine the number of phonemes. Write in Arabic digits.",
+    "Identify the number of phonemes in the provided audio recording. Use digits."
 ]
 
 if __name__ == "__main__":
