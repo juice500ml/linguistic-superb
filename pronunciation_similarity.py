@@ -5,6 +5,7 @@ from collections import defaultdict
 from datasets import load_dataset, Audio
 from utils import validate_dataset
 from panphon.distance import Distance
+from tqdm import tqdm
 
 
 instructions = [
@@ -29,3 +30,24 @@ instructions = [
     "Using the three audio recordings (A, B, X), decide if word X sounds more like word A or word B. Your answer should be either A or B.",
     "With the provided audio files (A, B, X), decide if word X is closer in pronunciation to word A or word B. Indicate your answer as either A or B."
 ]
+
+
+def generate_triplets(filenames):
+    """
+    Generate ABX (ordered) triplets within each language
+    """
+    # example filename: nan-004-028
+    lang_to_file = defaultdict(list)
+    for filename in filenames:
+        lang = filename.split('-')[0]
+        lang_to_file[lang].append(filename)
+
+    triplets = []
+    for lang, files in lang_to_file.items():
+        for first in files:
+            for second in files:
+                for third in files:
+                    if first != second and second != third and first != third:
+                        triplets.append((first, second, third))
+    return triplets
+
