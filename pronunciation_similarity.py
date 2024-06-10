@@ -2,7 +2,7 @@ import os
 import random
 from collections import defaultdict
 
-from datasets import load_dataset, Audio
+from datasets import Dataset, load_dataset, Audio
 from utils import validate_dataset
 from panphon.distance import Distance
 from tqdm import tqdm
@@ -67,6 +67,9 @@ if __name__ == "__main__":
 
     random.seed(15213)
 
+    # ensure no transcriptions are nan
+    ds = ds.filter(lambda sample: sample["word"] is not None)
+
     # get indices
     file_to_index = defaultdict(str)
     for i, ex in enumerate(ds['test']):
@@ -76,8 +79,29 @@ if __name__ == "__main__":
     rows = defaultdict(list)
     for (file1, file2, file3) in tqdm(generate_triplets(ds["test"]["file"])):
         rows["file1"].append(file1)
-        rows["audio1"].append(ds["test"][file_to_index[file1]]["audio"])
+        file1_ex = ds["test"][file_to_index[file1]]
+        rows["audio1"].append(file1_ex["audio"])
+        # the phones for the word, e.g. "kaʊ"
+        rows["word1"].append(file1_ex["word"])
+
         rows["file2"].append(file2)
-        rows["audio2"].append(ds["test"][file_to_index[file2]]["audio"])
+        file2_ex = ds["test"][file_to_index[file2]]
+        rows["audio2"].append(file2_ex["audio"])
+        rows["word2"].append(file2_ex["word"])
+
         rows["file3"].append(file3)
-        rows["audio3"].append(ds["test"][file_to_index[file3]]["audio"])
+        file3_ex = ds["test"][file_to_index[file3]]
+        rows["audio3"].append(file3_ex["audio"])
+        rows["word3"].append(file3_ex["word"])
+    ds = Dataset.from_dict(rows)
+
+    dist = Distance()
+    def generate_label(sample):
+        # use feature edit distance to quantify pronunciation similarity
+        A, B, X = sample["word1"], sample["word2"], sample["word3"]
+        sample["label"] = "A" \
+            if dist.feature_edit_distance(A, X) < dist.feature_edit_distance(B, X) \
+            else "B"
+        return sample
+
+    ds = ds.map(generate_label, num_proc=32)
