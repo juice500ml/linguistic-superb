@@ -42,12 +42,42 @@ def generate_triplets(filenames):
         lang = filename.split('-')[0]
         lang_to_file[lang].append(filename)
 
+    # since all possible triplets takes too long, just generate triplets
+        # where each element is used once
     triplets = []
     for lang, files in lang_to_file.items():
-        for first in files:
-            for second in files:
-                for third in files:
-                    if first != second and second != third and first != third:
-                        triplets.append((first, second, third))
+        random.shuffle(files)
+
+        for i in range(0, len(files) - 2, 3):
+            triplets.append((files[i], files[i + 1], files[i + 2]))
+
     return triplets
 
+
+if __name__ == "__main__":
+    ds = load_dataset(
+        "speech31/voxangeles",
+        cache_dir="datasets_cache",
+        revision="refs/convert/parquet",
+    )
+
+    # multilingual pronunciation similarity
+        # A,B,X from the same language
+        # but we cover multiple languages
+
+    random.seed(15213)
+
+    # get indices
+    file_to_index = defaultdict(str)
+    for i, ex in enumerate(ds['test']):
+        file_to_index[ex["file"]] = i
+
+    # columns: file1, audio1; file2, audio2; file3, audio3
+    rows = defaultdict(list)
+    for (file1, file2, file3) in tqdm(generate_triplets(ds["test"]["file"])):
+        rows["file1"].append(file1)
+        rows["audio1"].append(ds["test"][file_to_index[file1]]["audio"])
+        rows["file2"].append(file2)
+        rows["audio2"].append(ds["test"][file_to_index[file2]]["audio"])
+        rows["file3"].append(file3)
+        rows["audio3"].append(ds["test"][file_to_index[file3]]["audio"])
