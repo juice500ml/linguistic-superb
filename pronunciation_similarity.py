@@ -8,6 +8,9 @@ from panphon.distance import Distance
 from tqdm import tqdm
 
 
+# (normalized) feature edit distance threshold
+SIM_THRESH = 0.3
+
 instructions = [
     "Based on the three audio files (A, B, X), determine whether word X is closer in pronunciation to word A or word B. The answer could be A or B.",
     "Please determine whether word X is closer in pronunciation to word A or word B given the three audio files (A, B, X). Respond with A or B.",
@@ -67,6 +70,9 @@ if __name__ == "__main__":
 
     random.seed(15213)
 
+    # Filter out samples longer than 2 seconds
+    ds = ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
+
     # ensure no transcriptions are nan
     ds = ds.filter(lambda sample: sample["word"] is not None)
 
@@ -99,9 +105,14 @@ if __name__ == "__main__":
     def generate_label(sample):
         # use feature edit distance to quantify pronunciation similarity
         A, B, X = sample["word1"], sample["word2"], sample["word3"]
+        sample["dist_A_X"] = dist.feature_edit_distance(A, X)
+        sample["dist_B_X"] = dist.feature_edit_distance(B, X)
         sample["label"] = "A" \
-            if dist.feature_edit_distance(A, X) < dist.feature_edit_distance(B, X) \
+            if sample["dist_A_X"] < sample["dist_B_X"] \
             else "B"
         return sample
 
     ds = ds.map(generate_label, num_proc=32)
+
+    # only keep examples where the pronunciation similarity is unambiguous
+    ds = ds.filter(lambda sample: abs(sample["dist_A_X"] - sample["dist_B_X"]) > SIM_THRESH)
