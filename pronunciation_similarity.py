@@ -9,7 +9,10 @@ from tqdm import tqdm
 
 
 # (normalized) feature edit distance threshold
-SIM_THRESH = 0.3
+CLOSE_LOWER_BOUND = 0.2
+CLOSE_UPPER_BOUND = 0.4
+FAR_UPPER_BOUND = 0.6
+
 
 instructions = [
     "Based on the three audio files (A, B, X), determine whether word X is closer in pronunciation to word A or word B. The answer could be A or B.",
@@ -46,13 +49,16 @@ def generate_triplets(filenames):
         lang_to_file[lang].append(filename)
 
     # since all possible triplets takes too long, just generate triplets
-        # where each element is used once
+        # where each element is used 3 times
     triplets = []
     for lang, files in lang_to_file.items():
         random.shuffle(files)
 
         for i in range(0, len(files) - 2, 3):
+            # try all combinations of X, order of A and B does not matter
             triplets.append((files[i], files[i + 1], files[i + 2]))
+            triplets.append((files[i + 2], files[i + 1], files[i]))
+            triplets.append((files[i + 2], files[i], files[i + 1]))
 
     return triplets
 
@@ -113,10 +119,18 @@ if __name__ == "__main__":
             else "B"
         return sample
 
-    new_ds = new_ds.map(generate_label, num_proc=32)
+    new_ds = new_ds.map(generate_label)
 
     # only keep examples where the pronunciation similarity is unambiguous
-    new_ds = new_ds.filter(lambda sample: abs(sample["dist_A_X"] - sample["dist_B_X"]) > SIM_THRESH)
+    def unambiguous_similarity(sample):
+        return (CLOSE_LOWER_BOUND <= sample["dist_A_X"] <= CLOSE_UPPER_BOUND \
+            <= sample["dist_B_X"] <= FAR_UPPER_BOUND) \
+            or (CLOSE_LOWER_BOUND <= sample["dist_B_X"] <= CLOSE_UPPER_BOUND \
+            <= sample["dist_A_X"] <= FAR_UPPER_BOUND)
+    new_ds = new_ds.filter(unambiguous_similarity)
+
+    if len(new_ds) < 32:
+        raise Exception("Dataset too small")
 
     # Randomly select 90% of the samples for each length so that the duration is less than 1 hour
     # Create a new dataset with the selected indices
@@ -135,7 +149,7 @@ if __name__ == "__main__":
             "instruction": instructions[index % len(instructions)],
             "label": sample["label"],
         }
-    new_ds = new_ds.map(_map, with_indices=True, remove_columns=new_ds.column_names, num_proc=32)
+    new_ds = new_ds.map(_map, with_indices=True, remove_columns=new_ds.column_names)
     new_ds = new_ds.cast_column("audio1", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio2", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio3", Audio(sampling_rate=16_000))
