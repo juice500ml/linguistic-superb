@@ -11,7 +11,8 @@ from tqdm import tqdm
 # (normalized) feature edit distance threshold
 CLOSE_LOWER_BOUND = 0.2
 CLOSE_UPPER_BOUND = 0.4
-FAR_UPPER_BOUND = 0.6
+FAR_LOWER_BOUND = 0.6
+FAR_UPPER_BOUND = 0.8
 
 
 instructions = [
@@ -38,29 +39,51 @@ instructions = [
 ]
 
 
-def generate_triplets(filenames):
+def generate_triplets(filenames, words, dist):
     """
-    Generate ABX (ordered) triplets within each language
+    Generate ABX (ordered) triplets of filenames within each language
     """
     # example filename: nan-004-028
-    lang_to_file = defaultdict(list)
-    for filename in filenames:
+    # example word: tsiʔ
+    lang_to_words = defaultdict(list)
+    word_to_file = defaultdict(str)
+    for i, filename in enumerate(filenames):
         lang = filename.split('-')[0]
-        lang_to_file[lang].append(filename)
+        word = words[i]
+        lang_to_words[lang].append(word)
+        word_to_file[word] = filename
 
-    # since all possible triplets takes too long, just generate triplets
-        # where each element is used 3 times
     triplets = []
-    for lang, files in lang_to_file.items():
-        random.shuffle(files)
+    for lang, words in tqdm(lang_to_words.items()):
+        # compute feature edit distance between every other word
+        fed = defaultdict(float)
+        pairs = set()
+        for i, w1 in enumerate(words):
+            for j, w2 in enumerate(words):
+                if w1 and w2 and i != j:
+                    fed[(w1, w2)] = dist.feature_edit_distance(w1, w2)
+                    pairs.add((w1, w2))
 
-        for i in range(0, len(files) - 2, 3):
-            # try all combinations of X, order of A and B does not matter
-            triplets.append((files[i], files[i + 1], files[i + 2]))
-            triplets.append((files[i + 2], files[i + 1], files[i]))
-            triplets.append((files[i + 2], files[i], files[i + 1]))
+        # find close word pairs (CLOSE_LOWER_BOUND <= dist <= CLOSE_UPPER_BOUND)
+        close_pairs = [(w1, w2) for (w1, w2) in pairs \
+            if CLOSE_LOWER_BOUND <= fed[(w1, w2)] <= CLOSE_UPPER_BOUND ]
+        # find far word pairs (FAR_LOWER_BOUND <= dist <= FAR_UPPER_BOUND)
+        far_pairs = [(w1, w2) for (w1, w2) in pairs \
+            if FAR_LOWER_BOUND <= fed[(w1, w2)] <= FAR_UPPER_BOUND ]
+
+        # then create (A, B, X) triplets
+            # (A, X) = close_pair then find all (B, X) in far_pair
+        for (A, X) in close_pairs:
+            for (B, _) in [(w1, w2) for (w1, w2) in far_pairs if X == w2]:
+                file_A = word_to_file[A]
+                file_B = word_to_file[B]
+                file_X = word_to_file[X]
+                triplets.append((file_A, file_B, file_X))
+
+        # does not duplicate cases where A and B are swapped
 
     return triplets
+    # 127,743 triplets
 
 
 if __name__ == "__main__":
@@ -90,7 +113,18 @@ if __name__ == "__main__":
 
     # columns: file1, audio1; file2, audio2; file3, audio3
     rows = defaultdict(list)
-    for (file1, file2, file3) in tqdm(generate_triplets(new_ds["file"])):
+
+    # aim for 1000 examples (approx 1 hour)
+    triplets = generate_triplets(new_ds["file"], new_ds["word"], Distance())
+    triplets = random.sample(triplets, 1000)
+
+    # randomly shuffle A and B so the answer is not always A
+    answer_is_B = set(random.sample(triplets, 500))
+    triplets = [(B_f, A_f, X_f) if i in answer_is_B else (A_f, B_f, X_f) for i, (A_f, B_f, X_f) in enumerate(triplets)]
+
+    for i, (file1, file2, file3) in tqdm(enumerate(triplets)):
+        rows["label"].append("B" if i in answer_is_B else "A")
+
         rows["file1"].append(file1)
         file1_ex = new_ds[file_to_index[file1]]
         rows["audio1"].append(file1_ex["audio"])
@@ -107,35 +141,6 @@ if __name__ == "__main__":
         rows["audio3"].append(file3_ex["audio"])
         rows["word3"].append(file3_ex["word"])
     new_ds = Dataset.from_dict(rows)
-
-    dist = Distance()
-    def generate_label(sample):
-        # use feature edit distance to quantify pronunciation similarity
-        A, B, X = sample["word1"], sample["word2"], sample["word3"]
-        sample["dist_A_X"] = dist.feature_edit_distance(A, X)
-        sample["dist_B_X"] = dist.feature_edit_distance(B, X)
-        sample["label"] = "A" \
-            if sample["dist_A_X"] < sample["dist_B_X"] \
-            else "B"
-        return sample
-
-    new_ds = new_ds.map(generate_label)
-
-    # only keep examples where the pronunciation similarity is unambiguous
-    def unambiguous_similarity(sample):
-        return (CLOSE_LOWER_BOUND <= sample["dist_A_X"] <= CLOSE_UPPER_BOUND \
-            <= sample["dist_B_X"] <= FAR_UPPER_BOUND) \
-            or (CLOSE_LOWER_BOUND <= sample["dist_B_X"] <= CLOSE_UPPER_BOUND \
-            <= sample["dist_A_X"] <= FAR_UPPER_BOUND)
-    new_ds = new_ds.filter(unambiguous_similarity)
-
-    if len(new_ds) < 32:
-        raise Exception("Dataset too small")
-
-    # Randomly select 90% of the samples for each length so that the duration is less than 1 hour
-    # Create a new dataset with the selected indices
-    selected_indices = random.sample(range(len(new_ds)), int(0.9 * len(new_ds)))
-    new_ds = new_ds.select(selected_indices)
 
     # Reformatting
     def _map(sample, index):
