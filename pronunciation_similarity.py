@@ -119,7 +119,7 @@ if __name__ == "__main__":
     triplets = random.sample(triplets, 1000)
 
     # randomly shuffle A and B so the answer is not always A
-    answer_is_B = set(random.sample(triplets, 500))
+    answer_is_B = set(random.sample(range(1000), 500))
     triplets = [(B_f, A_f, X_f) if i in answer_is_B else (A_f, B_f, X_f) for i, (A_f, B_f, X_f) in enumerate(triplets)]
 
     for i, (file1, file2, file3) in tqdm(enumerate(triplets)):
