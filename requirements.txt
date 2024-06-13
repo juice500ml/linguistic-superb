@@ -1,6 +1,7 @@
 datasets==2.19
 jupyterlab==4.2
 librosa==0.10
-
 # Part-of-speech
 stanza
+panphon
+
