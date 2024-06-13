@@ -26,8 +26,9 @@ validate_dataset(ds)
 ds.push_to_hub(repo_id="your/repo_id", split="test", token=os.environ["HF_TOKEN"])
 ```
 
-
 ## References
+Peng Qi, Yuhao Zhang, Yuhui Zhang, Jason Bolton and Christopher D. Manning. 2020. Stanza: A Python Natural Language Processing Toolkit for Many Human Languages. *In Association for Computational Linguistics (ACL) System Demonstrations*. 2020.
+
 Eleanor Chodroff, Blaž Pažon, Annie Baker, and Steven Moran. 2024. Phonetic Segmentation of the UCLA Phonetics Lab Archive. In *Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING 2024)*, pages 12724–12733, Torino, Italia.
 
 David R. Mortensen, Patrick Littell, Akash Bharadwaj, Kartik Goyal, Chris Dyer, and Lori Levin. 2016. PanPhon: A Resource for Mapping IPA Segments to Articulatory Feature Vectors. In *Proceedings of COLING 2016, the 26th International Conference on Computational Linguistics: Technical Papers*, pages 3475–3484, Osaka, Japan.
