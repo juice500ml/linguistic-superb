@@ -9,11 +9,12 @@ from tqdm import tqdm
 
 
 # (normalized) feature edit distance threshold
-CLOSE_LOWER_BOUND = 0.2
-CLOSE_UPPER_BOUND = 0.4
+CLOSE_LOWER_BOUND = 0.1
+CLOSE_UPPER_BOUND = 0.27
 FAR_LOWER_BOUND = 0.6
 FAR_UPPER_BOUND = 0.8
 
+DEBUG = True
 
 instructions = [
     "Based on the three audio files (A, B, X), determine whether word X is closer in pronunciation to word A or word B. The answer could be A or B.",
@@ -115,7 +116,8 @@ if __name__ == "__main__":
     rows = defaultdict(list)
 
     # aim for 1000 examples (approx 1 hour)
-    triplets = generate_triplets(new_ds["file"], new_ds["word"], Distance())
+    dist = Distance()
+    triplets = generate_triplets(new_ds["file"], new_ds["word"], dist)
     triplets = random.sample(triplets, 1000)
 
     # randomly shuffle A and B so the answer is not always A
@@ -144,7 +146,8 @@ if __name__ == "__main__":
 
     # Reformatting
     def _map(sample, index):
-        return {
+        A, B, X = sample["word1"], sample["word2"], sample["word3"]
+        final_keys = {
             "audio1": sample["audio1"],
             "file1": sample["file1"],
             "audio2": sample["audio2"],
@@ -154,11 +157,20 @@ if __name__ == "__main__":
             "instruction": instructions[index % len(instructions)],
             "label": sample["label"],
         }
+        if DEBUG:
+            # for debugging
+            final_keys["dist_A_X"] = dist.feature_edit_distance(A, X)
+            final_keys["dist_B_X"] = dist.feature_edit_distance(B, X)
+            final_keys["A"] = A
+            final_keys["B"] = B
+            final_keys["X"] = X
+        return final_keys
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=new_ds.column_names)
     new_ds = new_ds.cast_column("audio1", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio2", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio3", Audio(sampling_rate=16_000))
 
     # Validate & Push
-    validate_dataset(new_ds)
+    if not DEBUG:
+        validate_dataset(new_ds)
     new_ds.push_to_hub(repo_id="kalbin/MultilingualPronunciationSimilarity_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
