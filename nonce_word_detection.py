@@ -98,17 +98,22 @@ if __name__ == "__main__":
         for _, _df in df[df.voice == voice].groupby("id"):
             assert len(_df) == 2
 
-            wrong_row = _df[_df.correct == 0].iloc[0]
-            correct_row = _df[_df.correct == 1].iloc[0]
+            # our prompt asks the LLM to detect the nonce word
+                # sWUGGY labels the real word the correct one
+                # so switch the label
+            nonce_row = _df[_df.correct == 0].iloc[0]
+            real_row = _df[_df.correct == 1].iloc[0]
 
-            if wrong_row.inversed_order:
+            if nonce_row.inversed_order:
+                # the real word is 2, so the nonce word is 1
                 rows["label"].append("1")
-                rows["audio1"].append(str(root_path / f"{correct_row.filename}.wav"))
-                rows["audio2"].append(str(root_path / f"{wrong_row.filename}.wav"))
+                rows["audio1"].append(str(root_path / f"{nonce_row.filename}.wav"))
+                rows["audio2"].append(str(root_path / f"{real_row.filename}.wav"))
             else:
+                # the real word is 1, so the nonce word is 2
                 rows["label"].append("2")
-                rows["audio1"].append(str(root_path / f"{wrong_row.filename}.wav"))
-                rows["audio2"].append(str(root_path / f"{correct_row.filename}.wav"))
+                rows["audio1"].append(str(root_path / f"{real_row.filename}.wav"))
+                rows["audio2"].append(str(root_path / f"{nonce_row.filename}.wav"))
 
     random.seed(42)
     rows["instruction"] = [instructions[i] for i in random.choices(range(21), k=len(rows["label"]))]
