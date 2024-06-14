@@ -11,7 +11,7 @@ from utils import rows_to_dataset, validate_dataset
 # adapted from sentence_grammar_acceptability.py
 
 instructions = [
-    "Given these two utterances (utterance 1 and utterance 2), which is not an actual word in the English language? Respond with 1 or 2."
+    "Given these two utterances (utterance 1 and utterance 2), which is not an actual word in the English language? Respond with 1 or 2.",
     "Based on the two audio files (1 and 2), spot which word is not a word in English. The answer should be 1 or 2.",
     "Please determine whether word 1 or word 2 is not an English word given the two audio files. Respond with 1 or 2.",
     "Determine if word 1 or word 2 is a fake English word given the two audio files (1 and 2). Write your answer as either 1 or 2.",
@@ -92,3 +92,27 @@ if __name__ == "__main__":
     _shuffle_label_order(df)
     print("out of", len(df), ",", len(df[df["inversed_order"]]), "are shuffled")
 
+    rows = {"audio1": [], "audio2": [], "instruction": [], "label": []}
+    for voice in sorted(df.voice.unique()):
+        # id is used to group (nonce word, real word) pairs
+        for _, _df in df[df.voice == voice].groupby("id"):
+            assert len(_df) == 2
+
+            wrong_row = _df[_df.correct == 0].iloc[0]
+            correct_row = _df[_df.correct == 1].iloc[0]
+
+            if wrong_row.inversed_order:
+                rows["label"].append("1")
+                rows["audio1"].append(str(root_path / f"{correct_row.filename}.wav"))
+                rows["audio2"].append(str(root_path / f"{wrong_row.filename}.wav"))
+            else:
+                rows["label"].append("2")
+                rows["audio1"].append(str(root_path / f"{wrong_row.filename}.wav"))
+                rows["audio2"].append(str(root_path / f"{correct_row.filename}.wav"))
+
+    random.seed(42)
+    rows["instruction"] = [instructions[i] for i in random.choices(range(21), k=len(rows["label"]))]
+
+    ds = rows_to_dataset(rows)
+    validate_dataset(ds)
+    ds.push_to_hub(repo_id="DynamicSuperb/NonceWordDetection_sWUGGY", split="test", token=os.environ["HF_TOKEN"])
