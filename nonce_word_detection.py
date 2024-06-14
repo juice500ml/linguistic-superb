@@ -1,5 +1,6 @@
 import os
 import random
+from collections import Counter
 
 import pandas as pd
 from pathlib import Path
@@ -63,6 +64,21 @@ def _sample_df(df):
     return df[df.index.isin(indices)].copy()
 
 
+def _shuffle_label_order(df):
+    indices = []
+    random.seed(42)
+    df["inversed_order"] = False
+    # shuffle the order within pairs so the correct answer is not always first
+    for voice in sorted(df.voice.unique()):
+        pair_ids = df[(df.voice == voice)].id.unique()
+        pair_ids = random.sample(sorted(pair_ids), k=len(pair_ids) // 2)
+        indices += df[
+            (df.voice == voice)
+            & (df.id.isin(pair_ids))
+        ].index.tolist()
+    df.loc[indices, "inversed_order"] = True
+
+
 if __name__ == "__main__":
     # full path: zrc/datasets/sLM21/lexical/dev
     root_path = Path("lexical/dev").absolute()
@@ -70,7 +86,9 @@ if __name__ == "__main__":
     df = pd.read_csv(gold_path)
 
     df = _sample_df(df)
+    print("length distribution", Counter(df.length))
+    print("voice distribution", Counter(df.voice))
 
-    from collections import Counter
-    print(Counter(df.length))
-    print(Counter(df.voice))
+    _shuffle_label_order(df)
+    print("out of", len(df), ",", len(df[df["inversed_order"]]), "are shuffled")
+
