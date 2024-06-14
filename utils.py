@@ -10,7 +10,7 @@ def rows_to_dataset(rows: Dict[str, list]) -> Dataset:
         if key in rows:
             file_key = "file" if key == "audio" else f"file{key[-1]}"
             rows[file_key] = [Path(f).name for f in rows[key]]
-        assert all([Path(f).exists() for f in rows[key]])
+            assert all([Path(f).exists() for f in rows[key]])
 
     ds = Dataset.from_dict(rows)
     for key in rows.keys():
