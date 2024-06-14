@@ -33,7 +33,7 @@ def validate_dataset(ds: Dataset) -> None:
 
     # instruction check
     instruction_size = len(set(ds["instruction"]))
-    assert instruction_size >= 10
+    assert instruction_size >= max(sample_size / 20, 10)
     assert all([isinstance(v, str) for v in ds["instruction"]])
     assert all([len(v) > 0 for v in ds["instruction"]])
 
