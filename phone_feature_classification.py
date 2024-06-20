@@ -72,7 +72,7 @@ phone_classification_instructions = [
 phone_classification_instructions = [inst + PHONE_SET_STR + "." for inst in phone_classification_instructions]
 
 # manner of articulation
-MANNER_SET = ["plosive", "fricative", "affricate", "nasal", "approximant", "lateral", "glide", "vowel"] # Zsiga Table 12.2
+MANNER_SET = ["plosive", "nasal", "trill", "tap", "fricative", "affricate", "approximant", "lateral", "glide", "vowel"] # IPA https://www.internationalphoneticassociation.org/sites/default/files/IPA_Kiel_2015.pdf
 MANNER_SET_STR = ", ".join(MANNER_SET[:-1]) + ", or " + MANNER_SET[-1]
 manner_classification_instructions = [
     "The audio clip consists of three phones. What is the manner of articulation of the phone in the middle? The answer could be: ",
@@ -139,4 +139,75 @@ manner_classification_instructions = [
     "Based on this audio clip that consists of 3 phones, please name the manner of articulation of the phone in the middle. The phone is one of the following: ",
     "Based on this audio clip that consists of 3 phones, please determine the manner of articulation of the phone in the middle. The phone is one of the following: "
 ]
-phone_classification_instructions = [inst + PHONE_SET_STR + "." for inst in phone_classification_instructions]
+manner_classification_instructions = [inst + MANNER_SET_STR + "." for inst in manner_classification_instructions]
+
+# place of articulation
+# TODO: separate instructions for vowels (frontness and backness)
+PLACE_SET = ["bilabial", "labiodental", "dental", "alveolar", "postalveolar", "velar", "uvular", "pharyngeal", "glottal" ]  # IPA https://www.internationalphoneticassociation.org/sites/default/files/IPA_Kiel_2015.pdf
+PLACE_SET_STR = ", ".join(PLACE_SET[:-1]) + ", or " + PLACE_SET[-1]
+place_classification_instructions = [
+    "The audio clip consists of three phones. What is the manner of articulation of the phone in the middle? The answer could be: ",
+    "The audio clip consists of three phones. Identify the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Label the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Name the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Determine the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please identify the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please label the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please name the manner of articulation of the phone in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please determine the manner of articulation of the phone in the middle. The answer could be: ",
+    "In the given triphone utterance, what is the manner of articulation of the phone in the middle? Choose from the following: ",
+    "In the given triphone utterance, identify the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, label the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, name the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, determine the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, please identify the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, please label the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, please name the manner of articulation of the phone in the middle. Choose from the following: ",
+    "In the given triphone utterance, please determine the manner of articulation of the phone in the middle. Choose from the following: ",
+    "What is the manner of articulation of the phone in the middle in this triphone audio file? Pick one phone from the following: ",
+    "Identify the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Label the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Name the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Determine the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please identify the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please label the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please name the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please determine the manner of articulation of the phone in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Listen to the audio clip, which consists of 3 phones. What is the manner of articulation of the phone in the middle? The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and identify the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and label the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and name the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and determine the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please identify the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please label the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please name the manner of articulation of the phone in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please determine the manner of articulation of the phone in the middle. The phone could be ",
+    "From the audio, which contains 3 phones, what is the manner of articulation of the phone in the middle? Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, identify the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, label the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, name the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, determine the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please identify the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please label the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please name the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please determine the manner of articulation of the phone in the middle. Choose one phone from the following: ",
+    "What is the manner of articulation of the phone you hear in the middle of this 3-phone audio clip? Choose one from the following: ",
+    "Identify the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Label the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Name the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Determine the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please identify the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please label the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please name the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please determine the manner of articulation of the phone you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Based on this audio clip that consists of 3 phones, what is the manner of articulation of the phone in the middle? The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, identify the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, label the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, name the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, determine the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please identify the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please label the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please name the manner of articulation of the phone in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please determine the manner of articulation of the phone in the middle. The phone is one of the following: "
+]
+place_classification_instructions = [inst + PLACE_SET_STR + "." for inst in place_classification_instructions]
