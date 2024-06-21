@@ -1,3 +1,8 @@
+import random
+
+import pandas as pd
+from datasets import load_dataset
+
 # TODO: pick limited phone set and only pick these phones (with 1 diacritic?)
 # TODO: could also narrow the set down when we generate the answer - include the 5 closest phones using FED?
 PHONE_SET = ["a", "e", "i", "o", "u"]
@@ -211,3 +216,27 @@ place_classification_instructions = [
     "Based on this audio clip that consists of 3 phones, please determine the manner of articulation of the phone in the middle. The phone is one of the following: "
 ]
 place_classification_instructions = [inst + PLACE_SET_STR + "." for inst in place_classification_instructions]
+
+
+if __name__ == "__main__":
+    ds = load_dataset(
+        "kalbin/VoxAngeles_phones",
+        cache_dir="datasets_cache",
+        revision="refs/convert/parquet",
+    )
+    ds = ds["test"]
+    df = pd.DataFrame(ds)
+
+    random.seed(15213)
+
+    # pick subset of each language's words (1000 / 95)
+    WORD_LIMIT = 1000  # approx 1 hour
+    NUM_LANGS = len(df["lang"].unique())
+    NUM_WORDS = WORD_LIMIT // NUM_LANGS
+    def subset_words(_lang_df):
+        words = _lang_df["word"].unique()
+        selected_words = set(random.choices(words, k=NUM_WORDS))
+        return _lang_df[_lang_df["word"].isin(selected_words)]
+    result = df.groupby(['lang']) \
+            .apply(subset_words) \
+            .reset_index(drop=True)
