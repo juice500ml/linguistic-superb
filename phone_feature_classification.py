@@ -2,6 +2,8 @@ import random
 
 import pandas as pd
 from datasets import load_dataset
+from panphon import FeatureTable
+import panphon.sonority
 
 # TODO: pick limited phone set and only pick these phones (with 1 diacritic?)
 # TODO: could also narrow the set down when we generate the answer - include the 5 closest phones using FED?
@@ -233,10 +235,53 @@ if __name__ == "__main__":
     WORD_LIMIT = 1000  # approx 1 hour
     NUM_LANGS = len(df["lang"].unique())
     NUM_WORDS = WORD_LIMIT // NUM_LANGS
-    def subset_words(_lang_df):
-        words = _lang_df["word"].unique()
+    def subset_words(lang_df):
+        words = lang_df["word"].unique()
         selected_words = set(random.choices(words, k=NUM_WORDS))
-        return _lang_df[_lang_df["word"].isin(selected_words)]
-    result = df.groupby(['lang']) \
+        return lang_df[lang_df["word"].isin(selected_words)]
+    df = df.groupby(['lang']) \
             .apply(subset_words) \
+            .reset_index(drop=True)
+
+    # select triphone environment from the phonetic transcription of the word
+
+    # ensure there are at least 3 phones in the word
+    df = df.groupby(['lang', 'word']) \
+            .filter(lambda group: len(group) >= 3) \
+            .reset_index(drop=True)
+    def get_triphone(word_df):
+        # for each word in the lang, pick 3 consecutive phone entries
+        start_pos = random.randint(0, len(word_df) - 3)
+        return word_df.iloc[start_pos:start_pos + 3]
+    df = df.groupby(['lang', 'word']) \
+            .apply(get_triphone) \
+            .reset_index(drop=True)
+
+    # exclude diphthongs for now (the formant transitions may reveal anyway)
+    VOWEL_SONORITY = 8
+    son = panphon.sonority.Sonority()
+    ft = FeatureTable()
+    def is_vowel(phone):
+        # ft.ipa_segs to convert to normalized decomposed form
+        return son.sonority(ft.ipa_segs(phone)[-1]) >= VOWEL_SONORITY
+    def no_diphthong(triphone_df):
+        assert len(triphone_df) == 3
+        # ensure index starts at 0
+        triphone_df = triphone_df.reset_index(drop=True)
+        x, mid, y = triphone_df.loc[0, 'phone'], triphone_df.loc[1, 'phone'], triphone_df.loc[2, 'phone']
+        try:
+            return not ((is_vowel(x) and is_vowel(mid)) or (is_vowel(mid) and is_vowel(y)))
+        except:
+            print(x, mid, y)
+            # panphon cannot handle one of the phones, discard for now
+            # j a ʡ
+            # m æ ʜ
+            # ʡ y r
+            # ʡ æ ɡʷ
+            # ʡ æ ʃ
+            # h ӕː t
+            # i g i
+            return False
+    df = df.groupby(['lang', 'word']) \
+            .filter(no_diphthong) \
             .reset_index(drop=True)
