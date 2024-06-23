@@ -285,3 +285,19 @@ if __name__ == "__main__":
     df = df.groupby(['lang', 'word']) \
             .filter(no_diphthong) \
             .reset_index(drop=True)
+
+    # extract timestamps for the triphone environment
+        # reduce each group into one
+    def extract_timestamps(word_df):
+        assert len(word_df) == 3
+        word_df = word_df.reset_index(drop=True)
+
+        word_df['start_t'] = word_df.loc[0, 'start']
+        word_df['finish_t'] = word_df.loc[2, 'finish']
+        word_df['phone'] = word_df.loc[0, 'phone'] + " " + word_df.loc[1, 'phone'] + " " + word_df.loc[2, 'phone']
+        return word_df.iloc[0]
+    df = df.groupby(['lang', 'word']) \
+        .apply(extract_timestamps) \
+        .reset_index(drop=True)
+    df = df.drop(['start', 'finish'], axis=1)
+    print(df)
