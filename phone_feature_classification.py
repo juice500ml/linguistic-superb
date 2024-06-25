@@ -220,6 +220,80 @@ place_classification_instructions = [
 place_classification_instructions = [inst + PLACE_SET_STR + "." for inst in place_classification_instructions]
 
 
+HEIGHT_SET = ["close", "close-mid", "open-mid", "open"]  # IPA https://www.internationalphoneticassociation.org/sites/default/files/IPA_Kiel_2015.pdf
+HEIGHT_SET_STR = ", ".join(HEIGHT_SET[:-1]) + ", or " + HEIGHT_SET[-1]
+FRONTNESS_SET = ["front", "central", "back"]
+FRONTNESS_SET_STR = ", ".join(FRONTNESS_SET[:-1]) + ", or " + FRONTNESS_SET[-1]
+height_classification_instructions = [
+    "The audio clip consists of three phones. What is the height of the vowel in the middle? The answer could be: ",
+    "The audio clip consists of three phones. Identify the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Label the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Name the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Determine the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please identify the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please label the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please name the height of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please determine the height of the vowel in the middle. The answer could be: ",
+    "In the given triphone utterance, what is the height of the vowel in the middle? Choose from the following: ",
+    "In the given triphone utterance, identify the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, label the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, name the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, determine the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please identify the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please label the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please name the height of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please determine the height of the vowel in the middle. Choose from the following: ",
+    "What is the height of the vowel in the middle in this triphone audio file? Pick one phone from the following: ",
+    "Identify the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Label the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Name the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Determine the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please identify the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please label the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please name the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please determine the height of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Listen to the audio clip, which consists of 3 phones. What is the height of the vowel in the middle? The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and identify the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and label the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and name the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and determine the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please identify the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please label the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please name the height of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please determine the height of the vowel in the middle. The phone could be ",
+    "From the audio, which contains 3 phones, what is the height of the vowel in the middle? Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, identify the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, label the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, name the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, determine the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please identify the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please label the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please name the height of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please determine the height of the vowel in the middle. Choose one phone from the following: ",
+    "What is the height of the vowel you hear in the middle of this 3-phone audio clip? Choose one from the following: ",
+    "Identify the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Label the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Name the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Determine the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please identify the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please label the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please name the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please determine the height of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Based on this audio clip that consists of 3 phones, what is the height of the vowel in the middle? The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, identify the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, label the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, name the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, determine the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please identify the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please label the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please name the height of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please determine the height of the vowel in the middle. The phone is one of the following: "
+]
+height_classification_instructions = [inst + HEIGHT_SET_STR + "." for inst in height_classification_instructions]
+
+
+
+
 if __name__ == "__main__":
     ds = load_dataset(
         "kalbin/VoxAngeles_phones",
