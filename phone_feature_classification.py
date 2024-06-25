@@ -439,5 +439,10 @@ if __name__ == "__main__":
     df = df.groupby(['lang', 'word']) \
         .apply(extract_timestamps) \
         .reset_index(drop=True)
-    df = df.drop(['start', 'finish'], axis=1)
-    print(df)
+    df = df.drop(['start', 'finish', 'phone'], axis=1)
+
+    # audio path
+    AUDIO_PATH = ''
+    def get_audio_path(row):
+        return f"{AUDIO_PATH}/{row['file']}_{row['start_t']}_{row['finish_t']}"
+    df['audio'] = df.apply(get_audio_path, axis=1)
