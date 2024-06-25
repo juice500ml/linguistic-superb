@@ -220,9 +220,11 @@ place_classification_instructions = [
 place_classification_instructions = [inst + PLACE_SET_STR + "." for inst in place_classification_instructions]
 
 
-HEIGHT_SET = ["close", "close-mid", "open-mid", "open"]  # IPA https://www.internationalphoneticassociation.org/sites/default/files/IPA_Kiel_2015.pdf
+HEIGHT_SET = ["close", "mid", "open"]  # IPA https://www.internationalphoneticassociation.org/sites/default/files/IPA_Kiel_2015.pdf
+    # group "close-mid", "open-mid" into "mid"
 HEIGHT_SET_STR = ", ".join(HEIGHT_SET[:-1]) + ", or " + HEIGHT_SET[-1]
-FRONTNESS_SET = ["front", "central", "back"]
+FRONTNESS_SET = ["[+back]", "[-back]"]
+    # there is no feature for "mid" (Zsiga, p. 269)
 FRONTNESS_SET_STR = ", ".join(FRONTNESS_SET[:-1]) + ", or " + FRONTNESS_SET[-1]
 height_classification_instructions = [
     "The audio clip consists of three phones. What is the height of the vowel in the middle? The answer could be: ",
@@ -434,7 +436,7 @@ if __name__ == "__main__":
 
         word_df['start_t'] = word_df.loc[0, 'start']
         word_df['finish_t'] = word_df.loc[2, 'finish']
-        word_df['phone'] = word_df.loc[0, 'phone'] + " " + word_df.loc[1, 'phone'] + " " + word_df.loc[2, 'phone']
+        word_df['phones'] = word_df.loc[0, 'phone'] + " " + word_df.loc[1, 'phone'] + " " + word_df.loc[2, 'phone']
         return word_df.iloc[0]
     df = df.groupby(['lang', 'word']) \
         .apply(extract_timestamps) \
@@ -446,3 +448,62 @@ if __name__ == "__main__":
     def get_audio_path(row):
         return f"{AUDIO_PATH}/{row['file']}_{row['start_t']}_{row['finish_t']}"
     df['audio'] = df.apply(get_audio_path, axis=1)
+
+    # TODO: prepare the answer
+        # get the natural class to feature mappings from Zsiga Table 12.2
+
+    # phone classification - the phone
+    phone_df = df.copy()
+    # manner of articulation - both vowels, consonants
+    manner_df = df.copy()
+    # place of articulation - only consonants
+    vowels = df.apply(lambda sample: is_vowel(sample['phones'].split(' ')[1]), axis=1)
+    place_df = df[~vowels].copy()
+    # vowel height, frontness - only vowels
+    vowel_height_df, vowel_frontness_df = df[vowels].copy(), df[vowels].copy()
+    def place_of_articulation(phone):
+        pass
+    def place_of_articulation(consonant):
+        pass
+    def vowel_frontness(vowel):
+        BACK = {
+            'back': 1,
+        }
+        if not ft.fts(vowel):
+            print(vowel)
+            return ""
+        elif ft.fts(vowel).match(BACK):
+            # back and central
+            return "[+back]"
+        else:
+            # front
+            return "[-back]"
+    def vowel_height(vowel):
+        HIGH = {
+            'hi': 1,
+            'lo': -1
+        }
+        MID = {
+            'hi': -1,
+            'lo': -1
+        }
+        LOW = {
+            'hi': -1,
+            'lo': 1
+        }
+        if not ft.fts(vowel):
+            print(vowel)
+            return ""
+        elif ft.fts(vowel).match(HIGH):
+            return "close"
+        elif ft.fts(vowel).match(MID):
+            return "mid"
+        else: # low
+            return "open"
+
+    manner_df['label'] = ''
+    place_df['label'] = ''
+    vowel_height_df['label'] = vowel_height_df.apply(lambda row: vowel_height(row['phones'].split(' ')[1]), axis=1)
+    vowel_height_df = vowel_height_df[vowel_height_df['label'].str.len() > 0]
+    vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1]), axis=1)
+    vowel_frontness_df = vowel_frontness_df[vowel_frontness_df['label'].str.len() > 0]
