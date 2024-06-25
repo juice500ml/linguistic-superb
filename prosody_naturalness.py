@@ -1,5 +1,6 @@
 import os
 import random
+from itertools import product
 
 import pandas as pd
 from pathlib import Path
@@ -7,19 +8,28 @@ from pathlib import Path
 from utils import rows_to_dataset, validate_dataset
 
 
-instructions = [
-    "Given these two utterances, which sentence sounds more prosodically natural? Respond with 1 or 2.",
-    "Between these two utterances, which one has a more natural prosody? Answer with 1 or 2.",
-    "Considering these two utterances, which one sounds more natural in terms of prosody? Choose 1 or 2.",
-    "From these two utterances, which one sounds more prosodically natural? Indicate with 1 or 2.",
-    "Of these two utterances, which one sounds more natural in prosody? Answer with 1 or 2.",
-    "Given these two utterances, which one has a more natural prosody? Reply with 1 or 2.",
-    "Which of these two utterances more prosodically natural? Choose 1 or 2.",
-    "Considering these two utterances, which one sounds more prosodically natural? Answer with 1 or 2.",
-    "Between these two utterances, which one sounds more natural in terms of prosody? Answer with 1 or 2.",
-    "Which of these two utterances sounds more natural in terms of prosody? Reply with 1 or 2.",
-    "Considering these two utterances, which sounds more natural in prosody? Answer 1 or 2.",
+questions = [
+    "Given these two utterances, which sentence sounds more prosodically natural?",
+    "Between these two utterances, which one has a more natural prosody?",
+    "Considering these two utterances, which one sounds more natural in terms of prosody?",
+    "From these two utterances, which one sounds more prosodically natural?"
+    "Of these two utterances, which one sounds more natural in prosody?",
+    "Given these two utterances, which one has a more natural prosody?",
+    "Which of these two utterances more prosodically natural?",
+    "Considering these two utterances, which one sounds more prosodically natural?",
+    "Between these two utterances, which one sounds more natural in terms of prosody?",
+    "Which of these two utterances sounds more natural in terms of prosody?",
+    "Considering these two utterances, which sounds more natural in prosody?",
 ]
+formats = [
+    "Respond with 1 or 2.",
+    "Answer with 1 or 2.",
+    "Choose 1 or 2.",
+    "Indicate with 1 or 2.",
+    "Reply with 1 or 2.",
+    "Answer 1 or 2.",
+]
+instructions = [f"{q} {f}" for q, f in product(questions, formats)]
 
 
 def _determine_inversed_order(df):
@@ -53,7 +63,7 @@ if __name__ == "__main__":
             rows["audio2"].append(str(root_path / f"{correct_row.filename}.wav"))
 
     random.seed(42)
-    rows["instruction"] = [instructions[i] for i in random.choices(range(11), k=len(rows["label"]))]
+    rows["instruction"] = [instructions[i] for i in random.choices(range(len(instructions)), k=len(rows["label"]))]
 
     ds = rows_to_dataset(rows)
     validate_dataset(ds)
