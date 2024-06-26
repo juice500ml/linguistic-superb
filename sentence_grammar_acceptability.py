@@ -1,5 +1,6 @@
 import os
 import random
+from itertools import product
 
 import pandas as pd
 from pathlib import Path
@@ -7,19 +8,31 @@ from pathlib import Path
 from utils import rows_to_dataset, validate_dataset
 
 
-instructions = [
-    "Given these two sentences, which sentence is grammatically correct? Respond with 1 or 2.",
-    "Between these two sentences, which one is grammatically correct? Choose 1 or 2.",
-    "Out of these two sentences, which one is grammatically accurate? Answer with 1 or 2.",
-    "Considering these two sentences, which is grammatically proper? Indicate by selecting 1 or 2.",
-    "From the two sentences provided, which is correct grammatically? Reply with 1 or 2.",
-    "Given the two sentences, which one is grammatically right? Respond by choosing 1 or 2.",
-    "Of these two sentences, which is grammatically correct? Reply with 1 or 2.",
-    "Between the two sentences given, which is grammatically accurate? Answer with 1 or 2.",
-    "Which of these two sentences is grammatically correct? Respond with either 1 or 2.",
-    "Looking at these two sentences, which is correct in terms of grammar? Choose 1 or 2.",
-    "Out of the two sentences, which one is correct grammatically? Indicate with 1 or 2.",
+questions = [
+    "Given these two sentences, which sentence is grammatically correct?",
+    "Between these two sentences, which one is grammatically correct?",
+    "Out of these two sentences, which one is grammatically accurate?",
+    "Considering these two sentences, which is grammatically proper?",
+    "From the two sentences provided, which is correct grammatically?",
+    "Given the two sentences, which one is grammatically right?",
+    "Of these two sentences, which is grammatically accurate?",
+    "Between the two sentences given, which is grammatically accurate?",
+    "Which of these two sentences is grammatically correct?",
+    "Looking at these two sentences, which is correct in terms of grammar?",
+    "Out of the two sentences, which one is correct grammatically?",
 ]
+formats = [
+    "Respond with 1 or 2.",
+    "Choose 1 or 2.",
+    "Answer with 1 or 2.",
+    "Indicate by selecting 1 or 2.",
+    "Respond by choosing 1 or 2.",
+    "Reply with 1 or 2.",
+    "Respond with either 1 or 2.",
+    "Indicate with 1 or 2.",
+]
+instructions = [f"{q} {f}" for q, f in product(questions, formats)]
+
 
 
 def _sample_df(df):
@@ -87,7 +100,7 @@ if __name__ == "__main__":
                 rows["audio2"].append(str(root_path / f"{correct_row.filename}.wav"))
 
     random.seed(42)
-    rows["instruction"] = [instructions[i] for i in random.choices(range(11), k=len(rows["label"]))]
+    rows["instruction"] = [instructions[i] for i in random.choices(range(len(instructions)), k=len(rows["label"]))]
 
     ds = rows_to_dataset(rows)
     validate_dataset(ds)
