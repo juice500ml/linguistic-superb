@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 def rows_to_dataset(rows: Dict[str, list]) -> Dataset:
-    for key in ("audio", "audio1", "audio2", "audio3"):
+    for key in ("audio", "audio1", "audio2", "audio3", "audio4"):
         if key in rows:
             file_key = "file" if key == "audio" else f"file{key[-1]}"
             rows[file_key] = [Path(f).name for f in rows[key]]
@@ -24,7 +24,7 @@ def validate_dataset(ds: Dataset) -> None:
     print("Validating dataset...")
 
     # column name check
-    assert len(set(ds.features.keys()) - {"instruction", "label", "audio", "audio1", "audio2", "audio3", "file", "file1", "file2", "file3"}) == 0
+    assert len(set(ds.features.keys()) - {"instruction", "label", "audio", "audio1", "audio2", "audio3", "audio4", "file", "file1", "file2", "file3", "file4"}) == 0
 
     # label check
     sample_size = len(ds["label"])
@@ -46,7 +46,7 @@ def validate_dataset(ds: Dataset) -> None:
 
     # audio length check
     total_audio_length = 0
-    for key in ("audio", "audio1", "audio2", "audio3"):
+    for key in ("audio", "audio1", "audio2", "audio3", "audio4"):
         if key in ds.features:
             assert ds.features[key].sampling_rate == 16_000
             for audio in tqdm(ds[key]):
