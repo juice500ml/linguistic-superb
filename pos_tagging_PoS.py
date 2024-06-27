@@ -7,21 +7,41 @@ from utils import validate_dataset
 
 # Initialize the stanza pipeline to use CPU
 stanza.download('en')
-nlp = stanza.Pipeline('en', use_gpu=False)
+nlp = stanza.Pipeline('en', use_gpu=True)
+
 
 tag_description = "The tags include ADJ, ADP, ADV, AUX, CCONJ, DET, INTJ, NOUN, NUM, PART, PRON, PROPN, SCONJ, and VERB."
-instructions = [
-    "For each word in the given audio utterance, determine the corresponding Part-of-Speech (POS) tag. " + tag_description + " For example, when you listen to an audio 'The quick brown fox jumps over the lazy dog', please generate DET ADJ ADJ NOUN VERB ADP DET ADJ NOUN.",
-    "Listen to the given audio clip and provide the Part-of-Speech (POS) tag for each word. " + tag_description + " For instance, for the audio 'She sells sea shells by the seashore on a sunny day', generate PRON VERB NOUN NOUN ADP DET NOUN ADP DET ADJ NOUN.",
-    "Determine the Part-of-Speech (POS) tag for every word in the audio sample. " + tag_description + " As an example, for 'He is running fast because he is late for the meeting', produce PRON AUX VERB ADV SCONJ PRON AUX ADJ ADP DET NOUN.",
-    "Identify the Part-of-Speech (POS) tag for each word in the provided audio. " + tag_description + " For example, for the audio 'It was a sunny day and the children were playing outside', generate PRON AUX DET ADJ NOUN CCONJ DET NOUN AUX VERB ADV.",
-    "Assign the appropriate Part-of-Speech (POS) tag to each word in the audio. " + tag_description + " For example, when listening to 'Cats are great pets, and they make wonderful companions', generate NOUN AUX ADJ NOUN CCONJ PRON VERB ADJ NOUN.",
-    "Listen to the audio and determine the Part-of-Speech (POS) tag for each word. " + tag_description + " For instance, for 'I enjoy reading books in the quiet park every afternoon', produce PRON VERB VERB NOUN ADP DET ADJ NOUN ADV NOUN.",
-    "From the given audio utterance, provide the Part-of-Speech (POS) tag for every word. " + tag_description + " For example, for 'They will travel tomorrow to visit their grandparents in the city', generate PRON AUX VERB ADV SCONJ VERB PRON NOUN ADP DET NOUN.",
-    "Determine and list the Part-of-Speech (POS) tag for each word in the audio. " + tag_description + " For instance, for 'My friend is coming over to help me with my homework', produce DET NOUN AUX VERB ADV ADP VERB PRON ADP DET NOUN.",
-    "Identify the POS tag for each word in the audio clip. " + tag_description + " For example, when you hear 'Birds are flying high in the sky, enjoying the warm weather', generate NOUN AUX VERB ADV ADP DET NOUN VERB DET ADJ NOUN.",
-    "Provide the Part-of-Speech (POS) tag for every word in the given audio. " + tag_description + " As an example, for the audio 'We watched a movie last night, and it was very entertaining', generate PRON VERB DET NOUN ADJ NOUN CCONJ PRON AUX ADV ADJ."
+
+# First part of the new set of instructions
+first = [
+    "For each word in the given audio utterance, determine and assign the corresponding Part-of-Speech (POS) tag.",
+    "For each word in the given audio clip, identify and assign the appropriate Part-of-Speech (POS) tag.",
+    "Listen to the audio and determine the Part-of-Speech (POS) tag for each word in the utterance.",
+    "For each word in the audio, identify its Part-of-Speech (POS) tag.",
+    "After listening to the audio, assign the correct Part-of-Speech (POS) tag to each word.",
+    "Determine the Part-of-Speech (POS) tag for each word in the audio utterance.",
+    "Identify and assign the Part-of-Speech (POS) tag for each word in the given audio.",
+    "Listen to the audio and determine the Part-of-Speech (POS) tag for each word.",
+    "For each word in the audio clip, identify its Part-of-Speech (POS) tag.",
+    "Determine and assign the Part-of-Speech (POS) tag for each word in the given audio."
 ]
+
+# Second part of the new set of instructions with examples
+second = [
+    "Write the transcribed utterance first, and then the POS tags followed by a '/'. For example, for 'The quick brown fox jumps over the lazy dog', generate the tags in the form of: The quick brown fox jumps over the lazy dog / DET ADJ ADJ NOUN VERB ADP DET ADJ NOUN.",
+    "Write the transcription of the utterance first, followed by the POS tags separated by a '/'. For example, for 'She decided to take a walk in the beautiful park despite the rain', format the response as: She decided to take a walk in the beautiful park despite the rain / PRON VERB PART VERB DET NOUN ADP DET ADJ NOUN SCONJ DET NOUN.",
+    "Write the transcription first, then the POS tags separated by a '/'. For example, for 'He was excited to receive the prestigious award at the annual ceremony', write: He was excited to receive the prestigious award at the annual ceremony / PRON AUX ADJ PART VERB DET ADJ NOUN ADP DET ADJ NOUN.",
+    "Transcribe the utterance first, followed by the POS tags separated by a '/'. For instance, 'Although it was raining, they decided to go for a hike in the mountains' should be formatted as: Although it was raining, they decided to go for a hike in the mountains / SCONJ PRON AUX VERB PRON VERB PART VERB ADP DET NOUN ADP DET NOUN.",
+    "Write the transcription first, then the POS tags separated by a '/'. For example, for 'The children enjoyed playing outside even though it was cold and windy', write: The children enjoyed playing outside even though it was cold and windy / DET NOUN VERB VERB ADV SCONJ PRON AUX ADJ CCONJ ADJ.",
+    "Transcribe the utterance first, followed by the POS tags separated by a '/'. For example, for 'She was delighted to see her friends after such a long time', write: She was delighted to see her friends after such a long time / PRON AUX ADJ PART VERB PRON NOUN ADP DET ADJ NOUN.",
+    "Write the transcription first, then the POS tags separated by a '/'. For instance, for 'They didn't realize how much they had missed the city until they returned', write: They didn't realize how much they had missed the city until they returned / PRON AUX PART VERB ADV ADV PRON AUX VERB DET NOUN SCONJ PRON VERB.",
+    "Write the transcription first, then the POS tags separated by a '/'. For example, for 'Despite the long journey, they were happy to reach their destination', write: Despite the long journey, they were happy to reach their destination / ADP DET ADJ NOUN PRON AUX ADJ PART VERB PRON NOUN.",
+    "Write the transcription first, followed by the POS tags separated by a '/'. For instance, 'The conference was postponed due to unforeseen circumstances', should be formatted as: The conference was postponed due to unforeseen circumstances / DET NOUN AUX VERB ADP ADJ NOUN.",
+    "Write the transcription first, then the POS tags separated by a '/'. For example, for 'The new policy will affect all employees starting next month', write: The new policy will affect all employees starting next month / DET ADJ NOUN AUX VERB DET NOUN VERB ADP NOUN."
+]
+
+# Using list comprehension to generate the combined list
+instructions = [f + " " + tag_description + " " + s for f in first for s in second]
 
 def filter_text(text):
     unwanted_chars = set("\"`;-:")
@@ -47,8 +67,11 @@ def contains_sym_x(pos_tags):
 
 if __name__ == "__main__":
     ds = load_dataset(
-        "blabble-io/libritts", "clean", split="test.clean",
-        cache_dir="/data1/datasets_cache",
+        "blabble-io/libritts", split="test.clean",
+        cache_dir="/tmp",
+        # cache_dir="./datasets_cache",
+        revision="refs/convert/parquet",
+        num_proc=16
     )
     
     # Filter sentences by audio length
@@ -88,4 +111,4 @@ if __name__ == "__main__":
     
     # Validate & Push
     validate_dataset(new_ds)
-    new_ds.push_to_hub(repo_id="DynamicSuperb/PoS_Estimation_LibriTTS_PoS", split="test", token=os.environ["HF_TOKEN"])
+    # new_ds.push_to_hub(repo_id="DynamicSuperb/PoS_Estimation_LibriTTS_PoS", split="test", token=os.environ["HF_TOKEN"])
