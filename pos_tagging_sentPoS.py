@@ -108,4 +108,4 @@ if __name__ == "__main__":
     
     # Validate & Push
     validate_dataset(new_ds)
-    new_ds.push_to_hub(repo_id="DynamicSuperb/PoS_Estimation_LibriTTS", split="test", token=os.environ["HF_TOKEN"])
+    new_ds.push_to_hub(repo_id="DynamicSuperb/PoS_Estimation_sentLibriTTS", split="test", token=os.environ["HF_TOKEN"])
