@@ -4,6 +4,9 @@ import pandas as pd
 from datasets import load_dataset
 from panphon import FeatureTable
 import panphon.sonority
+from panphon.distance import Distance
+from ipapy import UNICODE_TO_IPA
+from ipapy.ipachar import IPAVowel, IPAConsonant
 
 # TODO: pick limited phone set and only pick these phones (with 1 diacritic?)
 # TODO: could also narrow the set down when we generate the answer - include the 5 closest phones using FED?
@@ -448,8 +451,7 @@ if __name__ == "__main__":
         return f"{AUDIO_PATH}/{row['file']}_{row['start_t']}_{row['finish_t']}"
     df['audio'] = df.apply(get_audio_path, axis=1)
 
-    # TODO: prepare the answer
-        # get the natural class to feature mappings from Zsiga Table 12.2
+    # prepare the answer
 
     # phone classification - the phone
     phone_df = df.copy()
@@ -514,6 +516,7 @@ if __name__ == "__main__":
             'syl': +1
         }
 
+
         if "ʔ" in phone:
             return "plosive"
         elif "ɻ" in phone:
@@ -526,6 +529,7 @@ if __name__ == "__main__":
             return "trill"
         # https://en.wikipedia.org/wiki/Click_consonant
         elif any(click in phone for click in { "ʘ", "ǀ", "ǁ", "ǂ", "ǃ", "𝼊" }):
+            # could also use [+velaric]
             return "click"
         # https://en.wikipedia.org/wiki/Ejective_consonant
         elif "ʼ" in phone:
@@ -542,7 +546,26 @@ if __name__ == "__main__":
         print("could not determine manner of articulation for ", phone)
         return ""
     def place_of_articulation(consonant):
-        pass
+        if consonant in UNICODE_TO_IPA:
+            return UNICODE_TO_IPA[consonant].place
+
+        # find the closest phone in UNICODE_TO_IPA then get its place
+        min_fed = 1.0
+        closest_phone = ''
+        dist = Distance()
+        for phone in UNICODE_TO_IPA.keys():
+            # not recognized by panphon
+            if not ft.ipa_segs(phone):
+                continue
+
+            fed = dist.feature_edit_distance(consonant, phone)
+            if fed < min_fed:
+                min_fed = fed
+                closest_phone = phone
+        if isinstance(UNICODE_TO_IPA[closest_phone], IPAConsonant):
+            return UNICODE_TO_IPA[closest_phone].place
+        return ""
+
     def vowel_frontness(vowel):
         BACK = {
             'back': 1,
