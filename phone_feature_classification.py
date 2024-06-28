@@ -516,6 +516,8 @@ if __name__ == "__main__":
             'syl': +1
         }
 
+        if not ft.fts(phone):
+            return ""
 
         if "ʔ" in phone:
             return "plosive"
@@ -602,8 +604,10 @@ if __name__ == "__main__":
         else: # low
             return "open"
 
-    manner_df['label'] = ''
-    place_df['label'] = ''
+    manner_df['label'] = manner_df.apply(lambda row: manner_of_articulation(row['phones'].split(' ')[1]), axis=1)
+    manner_df = manner_df[manner_df['label'].str.len() > 0]
+    place_df['label'] = place_df.apply(lambda row: place_of_articulation(row['phones'].split(' ')[1]), axis=1)
+    place_df = place_df[place_df['label'].str.len() > 0]
     vowel_height_df['label'] = vowel_height_df.apply(lambda row: vowel_height(row['phones'].split(' ')[1]), axis=1)
     vowel_height_df = vowel_height_df[vowel_height_df['label'].str.len() > 0]
     vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1]), axis=1)
