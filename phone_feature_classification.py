@@ -1,7 +1,7 @@
 import random
 
 import pandas as pd
-from datasets import load_dataset
+from datasets import load_dataset, Dataset, Audio
 from panphon import FeatureTable
 import panphon.sonority
 from panphon.distance import Distance
@@ -604,6 +604,7 @@ if __name__ == "__main__":
         else: # low
             return "open"
 
+    phone_df['label'] = phone_df.apply(lambda row: row['phones'].split(' ')[1], axis=1)
     manner_df['label'] = manner_df.apply(lambda row: manner_of_articulation(row['phones'].split(' ')[1]), axis=1)
     manner_df = manner_df[manner_df['label'].str.len() > 0]
     place_df['label'] = place_df.apply(lambda row: place_of_articulation(row['phones'].split(' ')[1]), axis=1)
@@ -612,3 +613,23 @@ if __name__ == "__main__":
     vowel_height_df = vowel_height_df[vowel_height_df['label'].str.len() > 0]
     vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1]), axis=1)
     vowel_frontness_df = vowel_frontness_df[vowel_frontness_df['label'].str.len() > 0]
+
+    for task_name, dataframe in [("PhoneClassification", phone_df) \
+        ("MannerOfArticulationClassification", manner_df), ("ConsonantPlaceOfArticulationClassification", place_df), \
+        ("VowelFrontnessClassification", vowel_height_df), ("VowelHeightClassification", vowel_frontness_df)]:
+        ds = Dataset.from_pandas(dataframe)
+
+        # Reformatting
+        def _map(sample, index):
+            return {
+                "audio": sample["audio"],
+                "file": sample["audio"],
+                "instruction": instructions[index % len(instructions)],
+                "label": sample["label"],
+            }
+        new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds.column_names)
+        ds = ds.cast_column("audio", Audio(sampling_rate=16_000))
+
+        # Validate & Push
+        validate_dataset(new_ds)
+        new_ds.push_to_hub(repo_id=f"DynamicSuperb/{task_name}_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
