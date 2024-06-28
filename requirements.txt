@@ -3,5 +3,6 @@ jupyterlab==4.2
 librosa==0.10
 # Part-of-speech
 stanza
+# phonological features
 panphon
-
+ipapy
