@@ -1,4 +1,5 @@
 import random
+import os
 
 import pandas as pd
 from datasets import load_dataset, Dataset, Audio
@@ -7,6 +8,7 @@ import panphon.sonority
 from panphon.distance import Distance
 from ipapy import UNICODE_TO_IPA
 from ipapy.ipachar import IPAVowel, IPAConsonant
+import soundfile as sf
 
 # TODO: pick limited phone set and only pick these phones (with 1 diacritic?)
 # TODO: could also narrow the set down when we generate the answer - include the 5 closest phones using FED?
@@ -445,11 +447,25 @@ if __name__ == "__main__":
         .reset_index(drop=True)
     df = df.drop(['start', 'finish', 'phone'], axis=1)
 
-    # audio path
-    AUDIO_PATH = ''
-    def get_audio_path(row):
-        return f"{AUDIO_PATH}/{row['file']}_{row['start_t']}_{row['finish_t']}"
-    df['audio'] = df.apply(get_audio_path, axis=1)
+    # Filter out samples longer than 2 seconds
+    df = df[(df['finish_t'] - df['start_t']) <= 2]
+
+    # load the audio
+        # extract the timestamp from the audio
+        # save as new file
+    VOXANGELES_PATH = 'data/voxangeles/data/audited_aligned'
+    if not os.path.exists(VOXANGELES_PATH):
+        raise Exception("Please download VoxAngeles at data/")
+    def segment_audio(row):
+        full_word_path = f"{VOXANGELES_PATH}/{row['lang']}/{row['file']}.wav"
+        # 44100 Hz
+        audio, sampling_rate = sf.read(full_word_path)
+        start, end = int(row['start_t'] * sampling_rate), int(row['finish_t'] * sampling_rate)
+        segmented_path = f"{VOXANGELES_PATH}/{row['lang']}/{row['file']}_{start}_{end}.wav"
+        # convert sampling rate later
+        sf.write(segmented_path, audio, samplerate=sampling_rate)
+        return segmented_path
+    df['audio'] = df.apply(segment_audio, axis=1)
 
     # prepare the answer
 
