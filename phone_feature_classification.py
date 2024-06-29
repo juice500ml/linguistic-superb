@@ -367,6 +367,149 @@ frontness_classification_instructions = [
 frontness_classification_instructions = [inst + FRONTNESS_SET_STR + "." for inst in frontness_classification_instructions]
 
 
+def manner_of_articulation(phone, ft):
+    # using Table 12.2 from Zsiga
+    # to verify the manner of articulation, ```wget https://raw.githubusercontent.com/dmort27/panphon/master/panphon/data/ipa_bases.csv'''
+    # then df = pd.read_csv('ipa_bases.csv')
+
+    # df[(df['son'] == '-') & (df['cont'] == '-') & (df['delrel'] == '-')]
+    PLOSIVE = {
+        'son': -1,
+        'cont': -1,
+        'delrel': -1
+    }
+    # df[(df['son'] == '-') & (df['cont'] == '+')
+    FRICATIVE = {
+        'son': -1,
+        'cont': 1
+    }
+    # df[(df['son'] == '-') & (df['cont'] == '-') & (df['delrel'] == '+')]
+    AFFRICATE = {
+        'son': -1,
+        'cont': -1,
+        'delrel': 1
+    }
+    # df[(df['son'] == '+') & (df['cons'] == '+') & (df['nas'] == '+')]
+    NASAL = {
+        'son': 1,
+        'cons': 1,
+        'nas': 1
+    }
+    # df[(df['son'] == '+') & (df['cons'] == '+') & (df['cont'] == '+') & (df['lat'] == '-')]
+    #   [h] is an approximant under our classification
+    APPROXIMANT = {
+        'son': 1,
+        'cons': 1,
+        'cont': 1,
+        'lat': -1, # exclude lateral approximants, which we classify as lateral
+    }
+    # df[(df['son'] == '+') & (df['cons'] == '+') & (df['cont'] == '+') & (df['lat'] == '+')]
+    LATERAL = {
+        'son': 1,
+        'cons': 1,
+        'cont': 1,
+        'lat': 1
+    }
+    # df[(df['cons'] == '-') & (df['syl'] == '-')]; exclude [ʔ] (stop) and [ɻ] (approximant)
+    GLIDE = {
+        'cons': -1,
+        'syl': -1
+    }
+    # df[(df['cons'] == '-') & (df['syl'] == '+')]
+    VOWEL = {
+        'cons': -1, # exclude syllabic consonants
+        'syl': +1
+    }
+
+    if not ft.fts(phone):
+        return ""
+
+    if "ʔ" in phone:
+        return "plosive"
+    elif "ɻ" in phone:
+        return "approximant"
+    # https://en.wikipedia.org/wiki/Tap_and_flap_consonants#IPA_symbols
+    elif any(tap_flap in phone for tap_flap in { "ɾ", "ɺ", "ɽ", "𝼈", "ⱱ" }):
+        return "tap/flap"
+    # https://en.wikipedia.org/wiki/Trill_consonant
+    elif any(trill in phone for trill in { "r", "ʙ", "ʀ", "ʢ", "ʜ" }):
+        return "trill"
+    # https://en.wikipedia.org/wiki/Click_consonant
+    elif any(click in phone for click in { "ʘ", "ǀ", "ǁ", "ǂ", "ǃ", "𝼊" }):
+        # could also use [+velaric]
+        return "click"
+    # https://en.wikipedia.org/wiki/Ejective_consonant
+    elif "ʼ" in phone:
+        return "ejective"
+    # https://en.wikipedia.org/wiki/Implosive_consonant
+    elif any(implosive in phone for implosive in { "ɓ", "ɗ", "ᶑ", "ʄ", "ɠ", "ʛ" }):
+        return "implosive"
+
+    for features, manner in [(PLOSIVE, "plosive"), (FRICATIVE, "fricative"), (AFFRICATE, "affricate"), (NASAL, "nasal"), \
+            (APPROXIMANT, "approximant"), (LATERAL, "lateral"), (GLIDE, "glide"), (VOWEL, "vowel")]:
+        if ft.fts(phone).match(features):
+            return manner
+
+    print("could not determine manner of articulation for ", phone)
+    return ""
+
+def place_of_articulation(consonant, ft, dist):
+    if consonant in UNICODE_TO_IPA:
+        return UNICODE_TO_IPA[consonant].place
+
+    # find the closest phone in UNICODE_TO_IPA then get its place
+    min_fed = 1.0
+    closest_phone = ''
+    for phone in UNICODE_TO_IPA.keys():
+        # not recognized by panphon
+        if not ft.ipa_segs(phone):
+            continue
+
+        fed = dist.feature_edit_distance(consonant, phone)
+        if fed < min_fed:
+            min_fed = fed
+            closest_phone = phone
+    if isinstance(UNICODE_TO_IPA[closest_phone], IPAConsonant):
+        return UNICODE_TO_IPA[closest_phone].place
+    return ""
+
+def vowel_frontness(vowel, ft):
+    BACK = {
+        'back': 1,
+    }
+    if not ft.fts(vowel):
+        print("panphon lacks features for", vowel)
+        return ""
+    elif ft.fts(vowel).match(BACK):
+        # back and central
+        return "[+back]"
+    else:
+        # front
+        return "[-back]"
+
+def vowel_height(vowel, ft):
+    HIGH = {
+        'hi': 1,
+        'lo': -1
+    }
+    MID = {
+        'hi': -1,
+        'lo': -1
+    }
+    LOW = {
+        'hi': -1,
+        'lo': 1
+    }
+    if not ft.fts(vowel):
+        print(vowel)
+        return ""
+    elif ft.fts(vowel).match(HIGH):
+        return "close"
+    elif ft.fts(vowel).match(MID):
+        return "mid"
+    else: # low
+        return "open"
+
 
 if __name__ == "__main__":
     ds = load_dataset(
@@ -407,8 +550,7 @@ if __name__ == "__main__":
 
     # exclude diphthongs for now (the formant transitions may reveal anyway)
     VOWEL_SONORITY = 8
-    son = panphon.sonority.Sonority()
-    ft = FeatureTable()
+    son, ft, dist = panphon.sonority.Sonority(), FeatureTable(), Distance()
     def is_vowel(phone):
         # ft.ipa_segs to convert to normalized decomposed form
         return son.sonority(ft.ipa_segs(phone)[-1]) >= VOWEL_SONORITY
@@ -480,156 +622,15 @@ if __name__ == "__main__":
     place_df = df[~vowels].copy()
     # vowel height, frontness - only vowels
     vowel_height_df, vowel_frontness_df = df[vowels].copy(), df[vowels].copy()
-    def manner_of_articulation(phone):
-        # using Table 12.2 from Zsiga
-        # to verify the manner of articulation, ```wget https://raw.githubusercontent.com/dmort27/panphon/master/panphon/data/ipa_bases.csv'''
-        # then df = pd.read_csv('ipa_bases.csv')
-
-        # df[(df['son'] == '-') & (df['cont'] == '-') & (df['delrel'] == '-')]
-        PLOSIVE = {
-            'son': -1,
-            'cont': -1,
-            'delrel': -1
-        }
-        # df[(df['son'] == '-') & (df['cont'] == '+')
-        FRICATIVE = {
-            'son': -1,
-            'cont': 1
-        }
-        # df[(df['son'] == '-') & (df['cont'] == '-') & (df['delrel'] == '+')]
-        AFFRICATE = {
-            'son': -1,
-            'cont': -1,
-            'delrel': 1
-        }
-        # df[(df['son'] == '+') & (df['cons'] == '+') & (df['nas'] == '+')]
-        NASAL = {
-            'son': 1,
-            'cons': 1,
-            'nas': 1
-        }
-        # df[(df['son'] == '+') & (df['cons'] == '+') & (df['cont'] == '+') & (df['lat'] == '-')]
-        #   [h] is an approximant under our classification
-        APPROXIMANT = {
-            'son': 1,
-            'cons': 1,
-            'cont': 1,
-            'lat': -1, # exclude lateral approximants, which we classify as lateral
-        }
-        # df[(df['son'] == '+') & (df['cons'] == '+') & (df['cont'] == '+') & (df['lat'] == '+')]
-        LATERAL = {
-            'son': 1,
-            'cons': 1,
-            'cont': 1,
-            'lat': 1
-        }
-        # df[(df['cons'] == '-') & (df['syl'] == '-')]; exclude [ʔ] (stop) and [ɻ] (approximant)
-        GLIDE = {
-            'cons': -1,
-            'syl': -1
-        }
-        # df[(df['cons'] == '-') & (df['syl'] == '+')]
-        VOWEL = {
-            'cons': -1, # exclude syllabic consonants
-            'syl': +1
-        }
-
-        if not ft.fts(phone):
-            return ""
-
-        if "ʔ" in phone:
-            return "plosive"
-        elif "ɻ" in phone:
-            return "approximant"
-        # https://en.wikipedia.org/wiki/Tap_and_flap_consonants#IPA_symbols
-        elif any(tap_flap in phone for tap_flap in { "ɾ", "ɺ", "ɽ", "𝼈", "ⱱ" }):
-            return "tap/flap"
-        # https://en.wikipedia.org/wiki/Trill_consonant
-        elif any(trill in phone for trill in { "r", "ʙ", "ʀ", "ʢ", "ʜ" }):
-            return "trill"
-        # https://en.wikipedia.org/wiki/Click_consonant
-        elif any(click in phone for click in { "ʘ", "ǀ", "ǁ", "ǂ", "ǃ", "𝼊" }):
-            # could also use [+velaric]
-            return "click"
-        # https://en.wikipedia.org/wiki/Ejective_consonant
-        elif "ʼ" in phone:
-            return "ejective"
-        # https://en.wikipedia.org/wiki/Implosive_consonant
-        elif any(implosive in phone for implosive in { "ɓ", "ɗ", "ᶑ", "ʄ", "ɠ", "ʛ" }):
-            return "implosive"
-
-        for features, manner in [(PLOSIVE, "plosive"), (FRICATIVE, "fricative"), (AFFRICATE, "affricate"), (NASAL, "nasal"), \
-                (APPROXIMANT, "approximant"), (LATERAL, "lateral"), (GLIDE, "glide"), (VOWEL, "vowel")]:
-            if ft.fts(phone).match(features):
-                return manner
-
-        print("could not determine manner of articulation for ", phone)
-        return ""
-    def place_of_articulation(consonant):
-        if consonant in UNICODE_TO_IPA:
-            return UNICODE_TO_IPA[consonant].place
-
-        # find the closest phone in UNICODE_TO_IPA then get its place
-        min_fed = 1.0
-        closest_phone = ''
-        dist = Distance()
-        for phone in UNICODE_TO_IPA.keys():
-            # not recognized by panphon
-            if not ft.ipa_segs(phone):
-                continue
-
-            fed = dist.feature_edit_distance(consonant, phone)
-            if fed < min_fed:
-                min_fed = fed
-                closest_phone = phone
-        if isinstance(UNICODE_TO_IPA[closest_phone], IPAConsonant):
-            return UNICODE_TO_IPA[closest_phone].place
-        return ""
-
-    def vowel_frontness(vowel):
-        BACK = {
-            'back': 1,
-        }
-        if not ft.fts(vowel):
-            print("panphon lacks features for", vowel)
-            return ""
-        elif ft.fts(vowel).match(BACK):
-            # back and central
-            return "[+back]"
-        else:
-            # front
-            return "[-back]"
-    def vowel_height(vowel):
-        HIGH = {
-            'hi': 1,
-            'lo': -1
-        }
-        MID = {
-            'hi': -1,
-            'lo': -1
-        }
-        LOW = {
-            'hi': -1,
-            'lo': 1
-        }
-        if not ft.fts(vowel):
-            print(vowel)
-            return ""
-        elif ft.fts(vowel).match(HIGH):
-            return "close"
-        elif ft.fts(vowel).match(MID):
-            return "mid"
-        else: # low
-            return "open"
 
     phone_df['label'] = phone_df.apply(lambda row: row['phones'].split(' ')[1], axis=1)
-    manner_df['label'] = manner_df.apply(lambda row: manner_of_articulation(row['phones'].split(' ')[1]), axis=1)
+    manner_df['label'] = manner_df.apply(lambda row: manner_of_articulation(row['phones'].split(' ')[1], ft), axis=1)
     manner_df = manner_df[manner_df['label'].str.len() > 0]
-    place_df['label'] = place_df.apply(lambda row: place_of_articulation(row['phones'].split(' ')[1]), axis=1)
+    place_df['label'] = place_df.apply(lambda row: place_of_articulation(row['phones'].split(' ')[1], ft, dist), axis=1)
     place_df = place_df[place_df['label'].str.len() > 0]
-    vowel_height_df['label'] = vowel_height_df.apply(lambda row: vowel_height(row['phones'].split(' ')[1]), axis=1)
+    vowel_height_df['label'] = vowel_height_df.apply(lambda row: vowel_height(row['phones'].split(' ')[1], ft), axis=1)
     vowel_height_df = vowel_height_df[vowel_height_df['label'].str.len() > 0]
-    vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1]), axis=1)
+    vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1], ft), axis=1)
     vowel_frontness_df = vowel_frontness_df[vowel_frontness_df['label'].str.len() > 0]
 
     for task_name, instructions, dataframe in [("PhoneClassification", phone_classification_instructions, phone_df), \
