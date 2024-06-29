@@ -571,7 +571,7 @@ def vowel_height(vowel, ft):
         'lo': 1
     }
     if not ft.fts(vowel):
-        print(vowel)
+        print("panphon lacks features for", vowel)
         return ""
     elif ft.fts(vowel).match(HIGH):
         return "close"
@@ -604,6 +604,8 @@ if __name__ == "__main__":
 
     random.seed(15213)
 
+    son, ft, dist = panphon.sonority.Sonority(), FeatureTable(), Distance()
+
     # pick subset of each language's words (1000 / 95)
     WORD_LIMIT = 1000  # approx 1 hour
     NUM_LANGS = len(df["lang"].unique())
@@ -622,6 +624,15 @@ if __name__ == "__main__":
     df = df.groupby(['lang', 'word']) \
             .filter(lambda group: len(group) >= 3) \
             .reset_index(drop=True)
+    # skip duplicate words in the language
+    #   if a language has 2+ instances of the same word
+    #   then the number of entries in the groupby will be a multiple of the # phones in the word
+    def no_duplicate(word_df):
+        (_, word) = word_df.name
+        return len(ft.ipa_segs(word)) == len(word_df)
+    df = df.groupby(['lang', 'word']) \
+            .filter(no_duplicate) \
+            .reset_index(drop=True)
     def get_triphone(word_df):
         # for each word in the lang, pick 3 consecutive phone entries
         start_pos = random.randint(0, len(word_df) - 3)
@@ -632,7 +643,6 @@ if __name__ == "__main__":
 
     # exclude diphthongs for now (the formant transitions may reveal anyway)
     VOWEL_SONORITY = 8
-    son, ft, dist = panphon.sonority.Sonority(), FeatureTable(), Distance()
     def is_vowel(phone):
         # ft.ipa_segs to convert to normalized decomposed form
         return son.sonority(ft.ipa_segs(phone)[-1]) >= VOWEL_SONORITY
@@ -689,7 +699,8 @@ if __name__ == "__main__":
         start, end = int(row['start_t'] * sampling_rate), int(row['finish_t'] * sampling_rate)
         segmented_path = f"{VOXANGELES_PATH}/{row['lang']}/{row['file']}_{start}_{end}.wav"
         # convert sampling rate later
-        sf.write(segmented_path, audio, samplerate=sampling_rate)
+        assert len(audio[start:end]) > 0, (full_word_path, start, end)
+        sf.write(segmented_path, audio[start:end], samplerate=sampling_rate)
         return segmented_path
     df['audio'] = df.apply(segment_audio, axis=1)
 
