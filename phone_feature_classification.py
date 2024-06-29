@@ -734,12 +734,12 @@ if __name__ == "__main__":
     vowel_roundedness_df['label'] = vowel_roundedness_df.apply(lambda row: vowel_roundedness(row['phones'].split(' ')[1], ft), axis=1)
     vowel_roundedness_df = vowel_roundedness_df[vowel_roundedness_df['label'].str.len() > 0]
 
-    for task_name, instructions, dataframe in [("PhoneClassification", phone_classification_instructions, phone_df), \
-        ("MannerOfArticulationClassification", manner_classification_instructions, manner_df), \
-        ("ConsonantPlaceOfArticulationClassification", place_classification_instructions, place_df), \
-        ("VowelFrontnessClassification", frontness_classification_instructions, vowel_frontness_df), \
-        ("VowelHeightClassification", height_classification_instructions, vowel_height_df), \
-        ("VowelRoundednessClassification", roundedness_classification_instructions, vowel_roundedness_df)]:
+    for task_name, instructions, dataframe in [("Phone", phone_classification_instructions, phone_df), \
+        ("MannerOfArticulation", manner_classification_instructions, manner_df), \
+        ("ConsonantPlaceOfArticulation", place_classification_instructions, place_df), \
+        ("VowelFrontness", frontness_classification_instructions, vowel_frontness_df), \
+        ("VowelHeight", height_classification_instructions, vowel_height_df), \
+        ("VowelRoundedness", roundedness_classification_instructions, vowel_roundedness_df)]:
         ds = Dataset.from_pandas(dataframe)
 
         # Reformatting
@@ -755,4 +755,4 @@ if __name__ == "__main__":
 
         # Validate & Push
         validate_dataset(ds)
-        ds.push_to_hub(repo_id=f"DynamicSuperb/{task_name}_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
+        ds.push_to_hub(repo_id=f"DynamicSuperb/PhonologicalFeatureClassification_VoxAngeles-{task_name}", split="test", token=os.environ["HF_TOKEN"])
