@@ -540,6 +540,7 @@ def place_of_articulation(consonant, ft, dist):
             min_fed = fed
             closest_phone = phone
     if isinstance(UNICODE_TO_IPA[closest_phone], IPAConsonant):
+        print('mapped', consonant, 'to', closest_phone)
         return UNICODE_TO_IPA[closest_phone].place
     return ""
 
