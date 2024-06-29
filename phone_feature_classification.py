@@ -232,6 +232,8 @@ HEIGHT_SET_STR = ", ".join(HEIGHT_SET[:-1]) + ", or " + HEIGHT_SET[-1]
 FRONTNESS_SET = ["[+back]", "[-back]"]
     # there is no feature for "mid" (Zsiga, p. 269)
 FRONTNESS_SET_STR = ", ".join(FRONTNESS_SET[:-1]) + ", or " + FRONTNESS_SET[-1]
+ROUNDEDNESS_SET = ["rounded", "unrounded"]
+ROUNDEDNESS_SET_STR = ", ".join(ROUNDEDNESS_SET[:-1]) + ", or " + ROUNDEDNESS_SET[-1]
 height_classification_instructions = [
     "The audio clip consists of three phones. What is the height of the vowel in the middle? The answer could be: ",
     "The audio clip consists of three phones. Identify the height of the vowel in the middle. The answer could be: ",
@@ -365,6 +367,74 @@ frontness_classification_instructions = [
     "Based on this audio clip that consists of 3 phones, please determine the frontness of the vowel in the middle. The phone is one of the following: "
 ]
 frontness_classification_instructions = [inst + FRONTNESS_SET_STR + "." for inst in frontness_classification_instructions]
+
+
+roundedness_classification_instructions = [
+    "The audio clip consists of three phones. What is the roundedness of the vowel in the middle? The answer could be: ",
+    "The audio clip consists of three phones. Identify the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Label the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Name the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Determine the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please identify the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please label the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please name the roundedness of the vowel in the middle. The answer could be: ",
+    "The audio clip consists of three phones. Please determine the roundedness of the vowel in the middle. The answer could be: ",
+    "In the given triphone utterance, what is the roundedness of the vowel in the middle? Choose from the following: ",
+    "In the given triphone utterance, identify the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, label the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, name the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, determine the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please identify the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please label the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please name the roundedness of the vowel in the middle. Choose from the following: ",
+    "In the given triphone utterance, please determine the roundedness of the vowel in the middle. Choose from the following: ",
+    "What is the roundedness of the vowel in the middle in this triphone audio file? Pick one phone from the following: ",
+    "Identify the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Label the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Name the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Determine the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please identify the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please label the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please name the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Please determine the roundedness of the vowel in the middle in this triphone audio file. Pick one phone from the following: ",
+    "Listen to the audio clip, which consists of 3 phones. What is the roundedness of the vowel in the middle? The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and identify the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and label the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and name the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and determine the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please identify the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please label the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please name the roundedness of the vowel in the middle. The phone could be ",
+    "Listen to the audio clip, which consists of 3 phones, and please determine the roundedness of the vowel in the middle. The phone could be ",
+    "From the audio, which contains 3 phones, what is the roundedness of the vowel in the middle? Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, identify the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, label the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, name the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, determine the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please identify the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please label the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please name the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "From the audio, which contains 3 phones, please determine the roundedness of the vowel in the middle. Choose one phone from the following: ",
+    "What is the roundedness of the vowel you hear in the middle of this 3-phone audio clip? Choose one from the following: ",
+    "Identify the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Label the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Name the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Determine the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please identify the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please label the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please name the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Please determine the roundedness of the vowel you hear in the middle of this 3-phone audio clip. Choose one from the following: ",
+    "Based on this audio clip that consists of 3 phones, what is the roundedness of the vowel in the middle? The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, identify the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, label the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, name the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, determine the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please identify the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please label the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please name the roundedness of the vowel in the middle. The phone is one of the following: ",
+    "Based on this audio clip that consists of 3 phones, please determine the roundedness of the vowel in the middle. The phone is one of the following: "
+]
+roundedness_classification_instructions = [inst + ROUNDEDNESS_SET_STR + "." for inst in roundedness_classification_instructions]
 
 
 def manner_of_articulation(phone, ft):
@@ -510,6 +580,18 @@ def vowel_height(vowel, ft):
     else: # low
         return "open"
 
+def vowel_roundedness(vowel, ft):
+    ROUNDED = {
+        'round': 1,
+    }
+    if not ft.fts(vowel):
+        print("panphon lacks features for", vowel)
+        return ""
+    elif ft.fts(vowel).match(ROUNDED):
+        return "rounded"
+    else:
+        return "unrounded"
+
 
 if __name__ == "__main__":
     ds = load_dataset(
@@ -620,24 +702,32 @@ if __name__ == "__main__":
     # place of articulation - only consonants
     vowels = df.apply(lambda sample: is_vowel(sample['phones'].split(' ')[1]), axis=1)
     place_df = df[~vowels].copy()
-    # vowel height, frontness - only vowels
-    vowel_height_df, vowel_frontness_df = df[vowels].copy(), df[vowels].copy()
+    # vowel height, frontness, roundedness - only vowels
+    vowel_height_df, vowel_frontness_df, vowel_roundedness_df = df[vowels].copy(), df[vowels].copy(), df[vowels].copy()
 
     phone_df['label'] = phone_df.apply(lambda row: row['phones'].split(' ')[1], axis=1)
+
     manner_df['label'] = manner_df.apply(lambda row: manner_of_articulation(row['phones'].split(' ')[1], ft), axis=1)
     manner_df = manner_df[manner_df['label'].str.len() > 0]
+
     place_df['label'] = place_df.apply(lambda row: place_of_articulation(row['phones'].split(' ')[1], ft, dist), axis=1)
     place_df = place_df[place_df['label'].str.len() > 0]
+
     vowel_height_df['label'] = vowel_height_df.apply(lambda row: vowel_height(row['phones'].split(' ')[1], ft), axis=1)
     vowel_height_df = vowel_height_df[vowel_height_df['label'].str.len() > 0]
+
     vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1], ft), axis=1)
     vowel_frontness_df = vowel_frontness_df[vowel_frontness_df['label'].str.len() > 0]
+
+    vowel_roundedness_df['label'] = vowel_roundedness_df.apply(lambda row: vowel_roundedness(row['phones'].split(' ')[1], ft), axis=1)
+    vowel_roundedness_df = vowel_roundedness_df[vowel_roundedness_df['label'].str.len() > 0]
 
     for task_name, instructions, dataframe in [("PhoneClassification", phone_classification_instructions, phone_df), \
         ("MannerOfArticulationClassification", manner_classification_instructions, manner_df), \
         ("ConsonantPlaceOfArticulationClassification", place_classification_instructions, place_df), \
-        ("VowelFrontnessClassification", frontness_classification_instructions, vowel_height_df), \
-        ("VowelHeightClassification", height_classification_instructions, vowel_frontness_df)]:
+        ("VowelFrontnessClassification", frontness_classification_instructions, vowel_frontness_df), \
+        ("VowelHeightClassification", height_classification_instructions, vowel_height_df), \
+        ("VowelRoundednessClassification", roundedness_classification_instructions, vowel_roundedness_df)]:
         ds = Dataset.from_pandas(dataframe)
 
         # Reformatting
