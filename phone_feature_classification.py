@@ -10,6 +10,8 @@ from ipapy import UNICODE_TO_IPA
 from ipapy.ipachar import IPAVowel, IPAConsonant
 import soundfile as sf
 
+from utils import validate_dataset
+
 # TODO: pick limited phone set and only pick these phones (with 1 diacritic?)
 # TODO: could also narrow the set down when we generate the answer - include the 5 closest phones using FED?
 PHONE_SET = ["a", "e", "i", "o", "u"]
@@ -589,7 +591,7 @@ if __name__ == "__main__":
             'back': 1,
         }
         if not ft.fts(vowel):
-            print(vowel)
+            print("panphon lacks features for", vowel)
             return ""
         elif ft.fts(vowel).match(BACK):
             # back and central
@@ -630,9 +632,11 @@ if __name__ == "__main__":
     vowel_frontness_df['label'] = vowel_frontness_df.apply(lambda row: vowel_frontness(row['phones'].split(' ')[1]), axis=1)
     vowel_frontness_df = vowel_frontness_df[vowel_frontness_df['label'].str.len() > 0]
 
-    for task_name, dataframe in [("PhoneClassification", phone_df) \
-        ("MannerOfArticulationClassification", manner_df), ("ConsonantPlaceOfArticulationClassification", place_df), \
-        ("VowelFrontnessClassification", vowel_height_df), ("VowelHeightClassification", vowel_frontness_df)]:
+    for task_name, instructions, dataframe in [("PhoneClassification", phone_classification_instructions, phone_df), \
+        ("MannerOfArticulationClassification", manner_classification_instructions, manner_df), \
+        ("ConsonantPlaceOfArticulationClassification", place_classification_instructions, place_df), \
+        ("VowelFrontnessClassification", frontness_classification_instructions, vowel_height_df), \
+        ("VowelHeightClassification", height_classification_instructions, vowel_frontness_df)]:
         ds = Dataset.from_pandas(dataframe)
 
         # Reformatting
@@ -643,9 +647,9 @@ if __name__ == "__main__":
                 "instruction": instructions[index % len(instructions)],
                 "label": sample["label"],
             }
-        new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds.column_names)
+        ds = ds.map(_map, with_indices=True, remove_columns=ds.column_names)
         ds = ds.cast_column("audio", Audio(sampling_rate=16_000))
 
         # Validate & Push
-        validate_dataset(new_ds)
-        new_ds.push_to_hub(repo_id=f"DynamicSuperb/{task_name}_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
+        validate_dataset(ds)
+        ds.push_to_hub(repo_id=f"DynamicSuperb/{task_name}_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
