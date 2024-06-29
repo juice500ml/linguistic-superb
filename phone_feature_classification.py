@@ -152,7 +152,7 @@ manner_classification_instructions = [
 manner_classification_instructions = [inst + MANNER_SET_STR + "." for inst in manner_classification_instructions]
 
 # place of articulation
-PLACE_SET = ["bilabial", "labiodental", "dental", "alveolar", "postalveolar", "velar", "uvular", "pharyngeal", "glottal" ]  # IPA https://www.internationalphoneticassociation.org/sites/default/files/IPA_Kiel_2015.pdf
+PLACE_SET = list(set([p.place for p in UNICODE_TO_IPA.values() if isinstance(p, IPAConsonant)]))
 PLACE_SET_STR = ", ".join(PLACE_SET[:-1]) + ", or " + PLACE_SET[-1]
 place_classification_instructions = [
     "The audio clip consists of three phones. What is the manner of articulation of the phone in the middle? The answer could be: ",
