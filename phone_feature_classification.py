@@ -612,7 +612,7 @@ if __name__ == "__main__":
     NUM_WORDS = WORD_LIMIT // NUM_LANGS
     def subset_words(lang_df):
         words = lang_df["word"].unique()
-        selected_words = set(random.choices(words, k=NUM_WORDS))
+        selected_words = set(random.sample(set(words), k=NUM_WORDS + 5))  # without replacement
         return lang_df[lang_df["word"].isin(selected_words)]
     df = df.groupby(['lang']) \
             .apply(subset_words) \
