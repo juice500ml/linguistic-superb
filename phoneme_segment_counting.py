@@ -1,30 +1,30 @@
 import os
 import random
 from collections import defaultdict
-
 from datasets import load_dataset, Audio
 from utils import validate_dataset
 
 first = [
-    'Listen to the audio and count the number of phonemes present.',
-    'Count how many phonemes you hear in this audio.',
-    'Determine and count the number of phonemes in the provided audio.',
-    'Calculate the number of phonemes in the provided audio.',
-    'Identify the number of phonemes in the provided audio recording.',
-    'Identify the number of phonemes in this audio file.',
-    'Identify the total phonemes in this audio clip.',
-    'Count the phonemes present in this given audio file.',
-    'From the audio, ascertain the number of phonemes in the utterance.',
-    'Listen and count the phonemes in this audio recording.',
-    'Please count the number of phonemes in this audio.',
-    'Identify and count the phonemes in this audio sample.',
-    'Count the total number of phonemes in the given audio sample.',
-    'Please determine the number of phonemes in the audio provided.',
-    'Determine the number of phonemes in the given utterance.',
-    'Based on this audio, count the number of phonemes in the corresponding utterance.',
-    'Based on this audio, identify the number of phonemes.',
-    'Calculate the total number of phonemes in this audio clip.',
-    'Based on the audio clip, calculate the number of phonemes.'
+    'Listen to the audio and count the number of English phonemes present.',
+    'Count how many English phonemes you hear in this audio.',
+    'Determine and count the number of English phonemes in the provided audio.',
+    'Calculate the number of English phonemes in the provided audio.',
+    'Identify the number of English phonemes in the provided audio recording.',
+    'Identify the number of English phonemes in this audio file.',
+    'Identify the total English phonemes in this audio clip.',
+    'Count the English phonemes present in this given audio file.',
+    'From the audio, ascertain the number of English phonemes in the utterance.',
+    'Listen and count the English phonemes in this audio recording.',
+    'Please count the number of English phonemes in this audio.',
+    'Identify and count the English phonemes in this audio sample.',
+    'Count the total number of English phonemes in the given audio sample.',
+    'Please determine the number of English phonemes in the audio provided.',
+    'Determine the number of English phonemes in the given utterance.',
+    'Based on this audio, count the number of English phonemes in the corresponding utterance.',
+    'Based on this audio, identify the number of English phonemes.',
+    'Calculate the total number of English phonemes in this audio clip.',
+    'Based on the audio clip, calculate the number of English phonemes.',
+    'Listen to the audio file and count the total English phonemes.'
 ]
 
 second = [
@@ -36,41 +36,55 @@ second = [
     ' Please use Arabic numerals.',
     ' Write in Arabic numbers.',
     ' Use numbers for your response.',
-    ' Write in Arabic digits.'
+    ' Write in Arabic digits.',
+    ' Please write the number in Arabic numerals.',
+    ' Answer with Arabic numbers.',
+    ' Respond using Arabic digits.',
+    ' Write your answer with Arabic digits.',
+    ' Use digits to write your answer.',
+    ' Provide your answer in Arabic numbers.',
+    ' Respond in Arabic numerals.',
+    ' Use Arabic numerals for your response.',
+    ' Please write your answer using numbers.',
+    ' Provide the answer in digits.',
+    ' Use numbers for your answer.'
 ]
+
 
 # Using list comprehension to generate the combined list
 instructions = [f + " " + s for f in first for s in second]
 
 if __name__ == "__main__":
     ds = load_dataset(
-        "speech31/voxangeles",
+        "speech31/Librispeech_word",
         cache_dir="datasets_cache",
         revision="refs/convert/parquet",
     )
     new_ds = ds["test"]
 
-    def calculate_length(sample):
-        sample["label"] = len(sample["phn"].split())
-        return sample
+    # Create a set of unique filenames
+    unique_filenames = set(new_ds['filename'])
+    print(len(unique_filenames))
 
-    new_ds = new_ds.map(calculate_length, num_proc=32)
+    # Filter the dataset to only include samples with filenames in the set
+    new_ds = new_ds.filter(lambda sample: sample['filename'] in unique_filenames)
+    print(len(new_ds))
 
     # Filter out samples with length
-    new_ds = new_ds.filter(lambda sample: 1 < sample["label"] <= 10)
+    new_ds = new_ds.filter(lambda sample: 1 < sample["phonemeCount"])
 
     # Filter out samples longer than 2 seconds
-    new_ds = new_ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
+    new_ds = new_ds.filter(lambda sample: 0.3 < len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"])
 
     # Categorize the samples by their lengths
     length_categories = defaultdict(list)
     for i, sample in enumerate(new_ds):
-        length_categories[sample["label"]].append(i)
+        length_categories[sample["phonemeCount"]].append(i)
 
     # Randomly select 60% of the samples for each length
     selected_indices = []
     for i, (length, indices) in enumerate(sorted(length_categories.items())):
-        num_to_select = int(len(indices) * 0.6)
+        num_to_select = int(len(indices) * 0.3)
         random.seed(i)
         selected_indices.extend(random.sample(indices, num_to_select))
 
@@ -81,13 +95,13 @@ if __name__ == "__main__":
     def _map(sample, index):
         return {
             "audio": sample["audio"],
-            "file": sample["file"],
+            "file": sample["filename"],
             "instruction": instructions[index % len(instructions)],
-            "label": sample["label"],
+            "label": sample["phonemeCount"],
         }
-    new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds["test"].column_names, num_proc=32)
+    new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds["test"].column_names, num_proc=8)
     new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
 
     # Validate & Push
     validate_dataset(new_ds)
-    new_ds.push_to_hub(repo_id="speech31/PhoneSegmentCounting_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
+    new_ds.push_to_hub(repo_id="speech31/PhonemeSegmentCounting_Librispeech-words", split="test", token=os.environ["HF_TOKEN"])
