@@ -57,31 +57,23 @@ instructions = [f + " " + s for f in first for s in second]
 if __name__ == "__main__":
     ds = load_dataset(
         "speech31/Librispeech_word",
-        cache_dir="datasets_cache",
+        cache_dir="/data/user_data/eyeo2",
         revision="refs/convert/parquet",
     )
     new_ds = ds["test"]
 
-    # Create a set of unique filenames
-    unique_filenames = set(new_ds['filename'])
-    print(len(unique_filenames))
-
-    # Filter the dataset to only include samples with filenames in the set
-    new_ds = new_ds.filter(lambda sample: sample['filename'] in unique_filenames)
-    print(len(new_ds))
-
-    # Filter out samples with length
+    # Filter out samples to have more than 1 phoneme
     new_ds = new_ds.filter(lambda sample: 1 < sample["phonemeCount"])
 
-    # Filter out samples longer than 2 seconds
+    # Filter out samples longer than 0.3 seconds
     new_ds = new_ds.filter(lambda sample: 0.3 < len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"])
 
     # Categorize the samples by their lengths
     length_categories = defaultdict(list)
     for i, sample in enumerate(new_ds):
         length_categories[sample["phonemeCount"]].append(i)
-
-    # Randomly select 60% of the samples for each length
+    
+    # Randomly select 30% of the samples for each length
     selected_indices = []
     for i, (length, indices) in enumerate(sorted(length_categories.items())):
         num_to_select = int(len(indices) * 0.3)
@@ -95,13 +87,13 @@ if __name__ == "__main__":
     def _map(sample, index):
         return {
             "audio": sample["audio"],
-            "file": sample["filename"],
+            "file": sample["filename"].replace('.flac', ''),
             "instruction": instructions[index % len(instructions)],
-            "label": sample["phonemeCount"],
+            "label": str(sample["phonemeCount"]),
         }
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds["test"].column_names, num_proc=8)
     new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
 
     # Validate & Push
     validate_dataset(new_ds)
-    new_ds.push_to_hub(repo_id="speech31/PhonemeSegmentCounting_Librispeech-words", split="test", token=os.environ["HF_TOKEN"])
+    new_ds.push_to_hub(repo_id="DynamicSuperb/PhonemeSegmentCounting_Librispeech-words", split="test", token=os.environ["HF_TOKEN"])
