@@ -44,7 +44,7 @@ instructions = [f + " " + s for f in first for s in second]
 
 if __name__ == "__main__":
     ds = load_dataset(
-        "speech31/voxangeles_v3",
+        "speech31/voxangeles",
         cache_dir="datasets_cache",
         revision="refs/convert/parquet",
     )
@@ -62,7 +62,6 @@ if __name__ == "__main__":
     def calculate_length(sample):
         phn_without_diacritics = remove_diacritics(sample["phn"], diacritics)
         phones = [phone for phone in list(phn_without_diacritics) if phone.strip()]
-        print(sample["phn"], phones, len(phones))
         sample["label"] = len(phones)
         return sample
 
@@ -93,13 +92,13 @@ if __name__ == "__main__":
     def _map(sample, index):
         return {
             "audio": sample["audio"],
-            "file": sample["file"],
+            "file": sample["file"].replace('.flac', ''),
             "instruction": instructions[index % len(instructions)],
-            "label": sample["label"],
+            "label": str(sample["label"]),
         }
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds["test"].column_names)
     new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
 
     # Validate & Push
-    # validate_dataset(new_ds)
+    validate_dataset(new_ds)
     new_ds.push_to_hub(repo_id="DynamicSuperb/PhoneSegmentCounting_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
