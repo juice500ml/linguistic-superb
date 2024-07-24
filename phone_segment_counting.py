@@ -2,7 +2,7 @@ import os
 import random
 from collections import defaultdict
 
-from datasets import load_dataset, Audio
+from datasets import load_dataset, Audio, Dataset, Features, Value
 from utils import validate_dataset
 
 first = [
@@ -62,13 +62,13 @@ if __name__ == "__main__":
     def calculate_length(sample):
         phn_without_diacritics = remove_diacritics(sample["phn"], diacritics)
         phones = [phone for phone in list(phn_without_diacritics) if phone.strip()]
-        sample["label"] = len(phones)
+        sample["label"] = str(len(phones))  # Ensure label is a string
         return sample
 
     new_ds = new_ds.map(calculate_length)
 
     # Filter out samples with only one phone
-    new_ds = new_ds.filter(lambda sample: 1 < sample["label"])
+    new_ds = new_ds.filter(lambda sample: int(sample["label"]) > 1)
 
     # Filter out samples longer than 2 seconds
     new_ds = new_ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
@@ -94,10 +94,19 @@ if __name__ == "__main__":
             "audio": sample["audio"],
             "file": sample["file"].replace('.flac', ''),
             "instruction": instructions[index % len(instructions)],
-            "label": str(sample["label"]),
+            "label": sample["label"],  # Label is already a string
         }
+
+    # Apply map and define the dataset features
+    features = Features({
+        "audio": Audio(sampling_rate=16_000),
+        "file": Value("string"),
+        "instruction": Value("string"),
+        "label": Value("string"),
+    })
+
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=ds["test"].column_names)
-    new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
+    new_ds = new_ds.cast(features)
 
     # Validate & Push
     validate_dataset(new_ds)
