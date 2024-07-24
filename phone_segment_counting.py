@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     new_ds = new_ds.map(calculate_length)
 
-    # Filter out samples with length
-    new_ds = new_ds.filter(lambda sample: 1 < sample["label"] <= 10)
+    # Filter out samples with only one phone
+    new_ds = new_ds.filter(lambda sample: 1 < sample["label"])
 
     # Filter out samples longer than 2 seconds
     new_ds = new_ds.filter(lambda sample: len(sample["audio"]["array"]) / sample["audio"]["sampling_rate"] <= 2)
