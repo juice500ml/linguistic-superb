@@ -141,9 +141,9 @@ if __name__ == "__main__":
     for i, (file1, file2, file3) in tqdm(enumerate(triplets)):
         rows["label"].append("B" if i in answer_is_B else "A")
 
-        rows["file1"].append(file1)
+        rows["file"].append(file1)
         file1_ex = new_ds[file_to_index[file1]]
-        rows["audio1"].append(file1_ex["audio"])
+        rows["audio"].append(file1_ex["audio"])
         # the phones for the word, e.g. "kaʊ"
         rows["word1"].append(file1_ex["word"])
 
@@ -162,8 +162,8 @@ if __name__ == "__main__":
     def _map(sample, index):
         A, B, X = sample["word1"], sample["word2"], sample["word3"]
         final_keys = {
-            "audio1": sample["audio1"],
-            "file1": sample["file1"],
+            "audio": sample["audio"],
+            "file": sample["file"],
             "audio2": sample["audio2"],
             "file2": sample["file2"],
             "audio3": sample["audio3"],
@@ -180,7 +180,7 @@ if __name__ == "__main__":
             final_keys["X"] = X
         return final_keys
     new_ds = new_ds.map(_map, with_indices=True, remove_columns=new_ds.column_names)
-    new_ds = new_ds.cast_column("audio1", Audio(sampling_rate=16_000))
+    new_ds = new_ds.cast_column("audio", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio2", Audio(sampling_rate=16_000))
     new_ds = new_ds.cast_column("audio3", Audio(sampling_rate=16_000))
 
