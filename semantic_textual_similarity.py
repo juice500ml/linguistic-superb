@@ -51,8 +51,8 @@ if __name__ == "__main__":
     speakers = np.array(ds["test"]["speaker_id"])
     indices = np.arange(len(similarities))
     unique_ids = [
-        f"{t}_{st}_{pid}"
-        for (t, st, pid) in zip(ds["test"]["task"], ds["test"]["subtask"], ds["test"]["pair_id"])
+        f"{st}_{pid}"
+        for (st, pid) in zip(ds["test"]["subtask"], ds["test"]["pair_id"])  # ["task"] removed for filename-level uniqueness
     ]
 
     total_quadruplets = 250
@@ -62,7 +62,8 @@ if __name__ == "__main__":
     while len(l_pair) < total_quadruplets:
         l_index = np.random.randint(len(indices))
         r_index = np.random.randint(len(indices))
-        if (l_index not in (l_pair + r_pair)) \
+        if (l_index != r_index) \
+            and (l_index not in (l_pair + r_pair)) \
             and (r_index not in (l_pair + r_pair)) \
             and (abs(similarities[l_index] - similarities[r_index]) >= 1.0) \
             and (speakers[l_index] == speakers[r_index]) \
@@ -76,20 +77,20 @@ if __name__ == "__main__":
     np.random.seed(42)
     np.random.shuffle(is_flipped_list)
 
-    rows = {"instruction": [], "label": [], "file1": [], "file2": [], "file3": [], "file4": []}
+    rows = {"instruction": [], "label": [], "file": [], "file2": [], "file3": [], "file4": []}
     for i, (l_index, r_index, is_flipped) in enumerate(zip(l_pair, r_pair, is_flipped_list)):
         rows["instruction"].append(inversed_questions[i % len(inversed_questions)] if is_flipped else questions[i % len(questions)])
         rows["label"].append("yes" if (
             ((ds["test"]["similarity"][l_index] > ds["test"]["similarity"][r_index]) and (not is_flipped))
             or ((ds["test"]["similarity"][l_index] < ds["test"]["similarity"][r_index]) and (is_flipped))
         ) else "no")
-        rows["file1"].append(f"{ds['test']['subtask'][l_index]}_{ds['test']['pair_id'][l_index]}_0_human-speaker-{ds['test']['speaker_id'][l_index]}.wav")
+        rows["file"].append(f"{ds['test']['subtask'][l_index]}_{ds['test']['pair_id'][l_index]}_0_human-speaker-{ds['test']['speaker_id'][l_index]}.wav")
         rows["file2"].append(f"{ds['test']['subtask'][l_index]}_{ds['test']['pair_id'][l_index]}_1_human-speaker-{ds['test']['speaker_id'][l_index]}.wav")
         rows["file3"].append(f"{ds['test']['subtask'][r_index]}_{ds['test']['pair_id'][r_index]}_0_human-speaker-{ds['test']['speaker_id'][r_index]}.wav")
         rows["file4"].append(f"{ds['test']['subtask'][r_index]}_{ds['test']['pair_id'][r_index]}_1_human-speaker-{ds['test']['speaker_id'][r_index]}.wav")
 
     new_ds = rows_to_dataset(rows)
-    new_ds = new_ds.add_column("audio1", ds["test"].select(l_pair)["audio_a"]).cast_column("audio1", Audio(sampling_rate=16000))
+    new_ds = new_ds.add_column("audio", ds["test"].select(l_pair)["audio_a"]).cast_column("audio", Audio(sampling_rate=16000))
     new_ds = new_ds.add_column("audio2", ds["test"].select(l_pair)["audio_b"]).cast_column("audio2", Audio(sampling_rate=16000))
     new_ds = new_ds.add_column("audio3", ds["test"].select(r_pair)["audio_a"]).cast_column("audio3", Audio(sampling_rate=16000))
     new_ds = new_ds.add_column("audio4", ds["test"].select(r_pair)["audio_b"]).cast_column("audio4", Audio(sampling_rate=16000))

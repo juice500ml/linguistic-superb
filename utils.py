@@ -46,7 +46,7 @@ def validate_dataset(ds: Dataset) -> None:
 
     # audio length check
     total_audio_length = 0
-    for key in ("audio", "audio1", "audio2", "audio3", "audio4"):
+    for key in ("audio", "audio2", "audio3", "audio4"):
         if key in ds.features:
             assert ds.features[key].sampling_rate == 16_000
             for audio in tqdm(ds[key]):

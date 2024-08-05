@@ -82,7 +82,7 @@ if __name__ == "__main__":
     _determine_inversed_order(df)
 
 
-    rows = {"audio1": [], "audio2": [], "instruction": [], "label": []}
+    rows = {"audio": [], "audio2": [], "instruction": [], "label": []}
     for subtype in sorted(df.subtype.unique()):
         for _, _df in df[df.subtype == subtype].groupby("id"):
             assert len(_df) == 2
@@ -92,11 +92,11 @@ if __name__ == "__main__":
 
             if wrong_row.inversed_order:
                 rows["label"].append("1")
-                rows["audio1"].append(str(root_path / f"{correct_row.filename}.wav"))
+                rows["audio"].append(str(root_path / f"{correct_row.filename}.wav"))
                 rows["audio2"].append(str(root_path / f"{wrong_row.filename}.wav"))
             else:
                 rows["label"].append("2")
-                rows["audio1"].append(str(root_path / f"{wrong_row.filename}.wav"))
+                rows["audio"].append(str(root_path / f"{wrong_row.filename}.wav"))
                 rows["audio2"].append(str(root_path / f"{correct_row.filename}.wav"))
 
     random.seed(42)
