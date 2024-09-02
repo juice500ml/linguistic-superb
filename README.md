@@ -1,3 +1,8 @@
+# LinguisticSUPERB
+
+Code accompanying the linguistic tasks in DynamicSUPERB, an instruction tuning benchmark for speech language models.
+See https://github.com/dynamic-superb/dynamic-superb/issues/140 for more information.
+
 ## Set up environment
 ```sh
 conda create -p ./envs python=3.10
