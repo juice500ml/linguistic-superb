@@ -1,0 +1,180 @@
+{
+    "last_modified": "2023-07-20T13:55:11.923787",
+    "datasets": [
+        {
+            "name": "abxLS-dataset",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/datasets/abxLS.datasets.zip",
+            "md5sum": "a2d939bd3bfd5aa5d1e1bbeb3735ac87",
+            "total_size": "2.2 GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/benchmarks_datasets/#abx-ls",
+            "description": "ABX-LS benchmark files (ZRC2021_abx)"
+        },
+        {
+            "name": "sLM21-dataset",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/datasets/sLM21.dataset.zip",
+            "md5sum": "713dd4c2c4ab266c846cb2804c8d9e12",
+            "total_size": "30.6 GB",
+            "details_url": "https://zerospeech.com/tasks/task_4/benchmarks_datasets/#slm-21",
+            "description": "The sLM21 benchmark files (ZRC2021_lm_task)"
+        },
+        {
+            "name": "zrc2017-test-dataset",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/datasets/zrc2017-test-dataset.zip",
+            "md5sum": "57a692729215e4b14cd7da5b8d96ff77",
+            "total_size": "9.6 GB",
+            "details_url": "https://zerospeech.com/tasks/task_2/benchmarks_datasets/",
+            "description": "The test dataset for the ZRC2017 (ABX17 - TDE17)"
+        },
+        {
+            "name": "zrc2017-train-dataset",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/datasets/zrc2017-train-dataset.zip",
+            "md5sum": "fcf1b858f336d64c467aef848a8f9423",
+            "total_size": "11 GB",
+            "details_url": "https://zerospeech.com/tasks/task_2/benchmarks_datasets/",
+            "description": "The train dataset for the ZRC2017"
+        },
+        {
+            "name": "zr2015-buckeye",
+            "type": "external",
+            "install_config": "https://download.zerospeech.com/datasets/buckeye.install.json",
+            "md5sum": "f32307578cf8962bca3acf287987ac03",
+            "total_size": "4.2 GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/benchmarks_datasets/",
+            "description": "English part of the zrc2015 dataset"
+        },
+        {
+            "name": "zr2015-nchlt",
+            "type": "external",
+            "install_config": "https://download.zerospeech.com/datasets/nchlt.install.json",
+            "md5sum": "4a61b5c12d569e8c2ac0dc79a9cd6b3c",
+            "total_size": "6.2 GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/benchmarks_datasets/",
+            "description": "Xitsonga part of the zrc2015 dataset"
+        },
+        {
+            "name": "prosaudit-dataset",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/datasets/prosaudit-dataset.zip",
+            "md5sum": "e4f1054c0c749e45562b1fec191b29f5",
+            "total_size": "1003 MB",
+            "details_url": "https://zerospeech.com/tasks/task_4/tasks_goals/#lexical-semantics-the-ssimi-similarity-metrics",
+            "description": "Prosody benchmark files"
+        }
+    ],
+    "checkpoints": [
+        {
+            "name": "2021_baseline.checkpoints",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/models/2021_baseline.checkpoints.tar.gz",
+            "md5sum": "3c5cfeda5dca079f2c0c02b6cbeb08ed",
+            "total_size": "2.4GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "The zrc2021 baseline model"
+        },
+        {
+            "name": "2021_baseline_VG.checkpoints",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/models/2021_baseline_VG.checkpoints.zip",
+            "md5sum": "cd15403948f3d91ef1a3a58931418d26",
+            "total_size": "1.9GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "The zrc2021 visually grounded baseline model"
+        },
+        {
+            "name": "2021_topline.checkpoints",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/models/2021_topline.checkpoints.tar.gz",
+            "md5sum": "5dd0c31d37bd07a4ec52ac44ede0017f",
+            "total_size": "1.6GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "The zrc2021 topline model"
+        }
+    ],
+    "samples": [
+        {
+            "name": "abx17-random-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/abx17-random-submission.zip",
+            "md5sum": "2ff59c44342550f168e54da869a15757",
+            "total_size": "2.1 GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "Randomly generated submission for the abx17 benchmark (used for testing)"
+        },
+        {
+            "name": "abxLS-random-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/abxLS-random-submission.zip",
+            "md5sum": "702a4aab878061e5563872ae0f115a3b",
+            "total_size": "218 MB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "Randomly generated submission for ABX-LS benchmark"
+        },
+        {
+            "name": "abxLS-baseline-bert-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/abxLS-baseline-bert-submission.zip",
+            "md5sum": "d629b240d28887bd13c7b5d50295bf44",
+            "total_size": "15 GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "abxLS submission files, extracted from the Bert Baseline"
+        },
+        {
+            "name": "abxLS-baseline-lstm-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/abxLS-baseline-lstm-submission.zip",
+            "md5sum": "1d7ec7827bf436ecdb42b5d81d77329f",
+            "total_size": "15 GB",
+            "details_url": "https://zerospeech.com/tasks/task_1/",
+            "description": "abxLS submission files, extracted from the LSTM Baseline"
+        },
+        {
+            "name": "zrc2017-tde-random",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/zrc2017-tde-random.zip",
+            "md5sum": "59b2cf0b0c87253d95ce4ac92e1d6d3c",
+            "total_size": "7.4 MB",
+            "details_url": "https://zerospeech.com/tasks/task_2/",
+            "description": "Randomly generated submission for the tde17 benchmark (used for testing)"
+        },
+        {
+            "name": "zrc2020-baseline-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/2020_baseline-submission.zip",
+            "md5sum": "b5934920fcbb0b3af90611185696510b",
+            "total_size": "6.8 GB",
+            "details_url": "https://zerospeech.com/tasks/task_3/",
+            "description": "Baseline submission for the ZRC2020 (tde17, TTS0-19)"
+        },
+        {
+            "name": "sLM-random-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/sLM21-random-submission.zip",
+            "md5sum": "200b0f18d47dcd5d9a2801a22ded5588",
+            "total_size": "34 MB",
+            "details_url": "https://zerospeech.com/tasks/task_4/",
+            "description": "Randomly generated submission for sLM21 benchmark"
+        },
+        {
+            "name": "sLM-baseline-bert-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/sLM21-baseline-bert-submission.zip",
+            "md5sum": "3c259da47c371bc4ab40552d91805e32",
+            "total_size": "5.1 GB",
+            "details_url": "https://zerospeech.com/tasks/task_4/",
+            "description": "sLM21 submission files, extracted from the Bert Baseline"
+        },
+        {
+            "name": "sLM-baseline-lstm-submission",
+            "type": "internal",
+            "zip_url": "https://download.zerospeech.com/samples/sLM21-baseline-lstm-submission.zip",
+            "md5sum": "03b4bd108b8367cfac4bba96f21e2104",
+            "total_size": "6.8 GB",
+            "details_url": "https://zerospeech.com/tasks/task_4/",
+            "description": "sLM21 submission files, extracted from the LSTM Baseline"
+        }
+    ]
+}

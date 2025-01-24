@@ -42,7 +42,7 @@ def validate_dataset(ds: Dataset) -> None:
     if num_audios > 1:
         assert sample_size == len(set(zip(*[ds[f"file{'' if i == 0 else i+1}"] for i in range(num_audios)])))
     # the first file will be used as an index by DynamicSUPERB and thus needs to be unique
-    assert sample_size == len(set(ds["file"]))
+    assert sample_size == len(set(ds["file"])), len(set(ds["file"]))
 
     # audio length check
     total_audio_length = 0

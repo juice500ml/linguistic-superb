@@ -14,7 +14,7 @@ CLOSE_UPPER_BOUND = 0.27
 FAR_LOWER_BOUND = 0.6
 FAR_UPPER_BOUND = 0.8
 
-DEBUG = True
+DEBUG = False
 
 instructions_command = [
     "Based on the three audio files (A, B, X), determine whether word X is closer in pronunciation to word A or word B.",
@@ -129,14 +129,24 @@ if __name__ == "__main__":
     # columns: file1, audio1; file2, audio2; file3, audio3
     rows = defaultdict(list)
 
+    # TODO: balance dataset
+
     # aim for 1000 examples (approx 1 hour)
     dist = Distance()
     triplets = generate_triplets(new_ds["file"], new_ds["word"], dist)
-    triplets = random.sample(triplets, 1000)
 
     # randomly shuffle A and B so the answer is not always A
-    answer_is_B = set(random.sample(range(1000), 500))
+    answer_is_B = set(random.sample(range(len(triplets)), len(triplets) // 2))
     triplets = [(B_f, A_f, X_f) if i in answer_is_B else (A_f, B_f, X_f) for i, (A_f, B_f, X_f) in enumerate(triplets)]
+
+    # "file" column needs to be unique - pick the first triplet for each file
+    unique_A = set()
+    new_triplets = []
+    for (A, B, X) in triplets:
+        if A not in unique_A:
+            unique_A.add(A)
+            new_triplets.append((A, B, X))
+    triplets = random.sample(new_triplets, 1000)
 
     for i, (file1, file2, file3) in tqdm(enumerate(triplets)):
         rows["label"].append("B" if i in answer_is_B else "A")
@@ -185,6 +195,9 @@ if __name__ == "__main__":
     new_ds = new_ds.cast_column("audio3", Audio(sampling_rate=16_000))
 
     # Validate & Push
-    if not DEBUG:
-        validate_dataset(new_ds)
-    new_ds.push_to_hub(repo_id="kalbin/MultilingualPronunciationSimilarity_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])
+    validate_dataset(new_ds)
+    if DEBUG:
+        namespace = "kalbin"
+    else:
+        namespace = "DynamicSuperb"
+    new_ds.push_to_hub(repo_id=f"{namespace}/MultilingualPronunciationSimilarity_VoxAngeles", split="test", token=os.environ["HF_TOKEN"])

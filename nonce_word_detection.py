@@ -92,7 +92,7 @@ if __name__ == "__main__":
     _shuffle_label_order(df)
     print("out of", len(df), ",", len(df[df["inversed_order"]]), "are shuffled")
 
-    rows = {"audio1": [], "audio2": [], "instruction": [], "label": []}
+    rows = {"audio": [], "audio2": [], "instruction": [], "label": []}
     for voice in sorted(df.voice.unique()):
         # id is used to group (nonce word, real word) pairs
         for _, _df in df[df.voice == voice].groupby("id"):
@@ -107,12 +107,12 @@ if __name__ == "__main__":
             if nonce_row.inversed_order:
                 # the real word is 2, so the nonce word is 1
                 rows["label"].append("1")
-                rows["audio1"].append(str(root_path / f"{nonce_row.filename}.wav"))
+                rows["audio"].append(str(root_path / f"{nonce_row.filename}.wav"))
                 rows["audio2"].append(str(root_path / f"{real_row.filename}.wav"))
             else:
                 # the real word is 1, so the nonce word is 2
                 rows["label"].append("2")
-                rows["audio1"].append(str(root_path / f"{real_row.filename}.wav"))
+                rows["audio"].append(str(root_path / f"{real_row.filename}.wav"))
                 rows["audio2"].append(str(root_path / f"{nonce_row.filename}.wav"))
 
     random.seed(42)
